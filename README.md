@@ -1180,7 +1180,7 @@ Because I wrote these functions and scripts for my personal use, the following m
 
 | THINGS THAT DEPEND UPON MY SETUP |
 |--|
-| Any function using `/etc/fstab` |
+| Any function reading `/etc/fstab` |
 | The `MOUNT` function uses preset directories and system links in `/media` |
 | The variables `All_PCS` and `OTHER_PCS` are related to my internal DNS |
 | The network functions in general are based upon my internal DNS |
