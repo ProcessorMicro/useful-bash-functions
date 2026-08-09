@@ -108,6 +108,8 @@ function RUNME() {
       COMMON_FUNCTIONS="$(type -p functions.sh)"    # Locate and load functions.sh
       [[ -x ${COMMON_FUNCTIONS} ]] && source "${COMMON_FUNCTIONS}" || { echo -e "Cannot locate "${COMMON_FUNCTIONS:-functions.sh}"." 1>&2 ; exit ; }
     fi
+    [[ -f ~/bin/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh ]] && EFdir=~/bin || EFdir=/etc/profile.d
+    source "${EFdir}/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh"
 
     for _i_ in ${_Lib_[*]} ; do echo source "${_i_}${_New_}" ; source "${_i_}${_New_}" ; done	# Load other libraries
     if (( _Debug_ > 1 )) ; then

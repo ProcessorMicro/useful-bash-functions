@@ -93,12 +93,11 @@ function UnInstall() {
   rm -f "${EtcDir}/${DefaultsFile}" || ERROR "while removing script \"${EtcDir}/${DefaultsFile}\"."
   rm -f "${EtcDir}/${ExtraFunctions}" || ERROR "while removing script \"${EtcDir}/${ExtraFunctions}\"."
 
-  [[ -d bin ]] && cd bin
   while read -u 3 Script ; do
     rm -f "${BinDir}/${Script}" || ERROR "while removing script \"${BinDir}/${Script}\"."
-  done 3< <( find -type f )
+  done 3< <( ls ./{functions.sh,.f*awk,.f*.txt,MKSCRIPT,FIND-FUNCTIONS} )
 
-  if ! grep -q "^if .*_USER_functions_sh_loaded_" ~/.bash_profile ; then
+  if ! grep -q "^if .*_USER_functions_sh_loaded_" ~/.bashrc ; then
     sed --in-place ~/.bashrc -e '/^if .*_USER_functions_sh_loaded_.*; *then/,/^fi/d'
   fi
 
@@ -116,7 +115,7 @@ cd "${WhereAmI}"				# Go there
 DefaultsFile="FUNCTIONS-SH-GLOBAL-DEFAULTS.sh"
 ExtraFunctions="FUNCTIONS-SH-EXTRA-FUNCTIONS.sh"
 
-if [[ $1 == --system-${WhoAmIaction/un/} ]] ; then
+if [[ ${1/un/} == --system-${WhoAmIaction/un/} ]] ; then
   (( $( id -u ) )) && ERROR "You must run this script as \"root\"."
   BinDir="/usr/local/bin"			# Where we want to put the system scripts
   EtcDir="/etc/profile.d"					# Where we want to put the system scripts

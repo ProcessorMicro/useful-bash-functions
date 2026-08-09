@@ -2,7 +2,7 @@
 # vim: set nomodified number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
 SCRIPT_PURPOSE_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
-COMMON_FUNCTIONS_VERSION="14.01.08 - Aug 06, 2026"
+COMMON_FUNCTIONS_VERSION="14.01.09 - Aug 08, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -103,6 +103,7 @@ function DO_HELP() {
     echo -e "Purpose: ${SCRIPT_PURPOSE_FUNCTIONS_SH}\nVersion: ${COMMON_FUNCTIONS_VERSION}"
   elif (( $# )) ; then
     FIND-FUNCTIONS -l -c -s "${_FUNCTIONS_SH_}" "$@"
+echo    FIND-FUNCTIONS -l -c -s "${_FUNCTIONS_SH_}" "$@"
   else
     grep --line-number '^##' "${_FUNCTIONS_SH_}" \
       |  sed -e 's/##[ _]\?//' \
@@ -111,7 +112,7 @@ function DO_HELP() {
   fi
 }
 # Check to see if it has been executed as a command
-[[ "${BASH_SOURCE[0]}" == "${0}" ]] && { DO_HELP $1 ; exit ; }
+[[ "${BASH_SOURCE[0]}" == "${0}" ]] && { DO_HELP "$@" ; exit ; }
 
 ##________________________________________________________________________________
 ## FUNCTIONS -
@@ -346,7 +347,10 @@ function DO_HELP() {
 ##  #############################################################################
 ##  # Note: For the GET..._PC_NAME functions to work, you must define all your  #
 ##  #       local PC names, In your terminal command line environment execute:  #
-##  #            export LOCAL_PCS="pc1 pc2 ..."                                 #
+##  #            export LOCAL_PCS="PC1 PC2 ..."                                 #
+##  # Where:                                                                    #
+##  #   Each PCi is a PC name defined either in the /etc/hosts file or in a     #
+##  #   (local) DNS.                                                            #
 ##  #############################################################################
 ##
 declare -gx LOCAL_PCS=${LOCAL_PCS:=LOCAL_PC_NAMES_UNDEFINED} # List of local PCs to be accessed
@@ -3702,33 +3706,27 @@ function GET_ALL_UNIQUE_NFS_DOMAINS_IN_FSTAB() {
 ##     EXCLOPT is one of the following options:
 ##          <empty>  If EXCLOPT is not present then the options in OPTIONS
 ##                   are mutually exclusive (only one can be specified).
-##       --Only_One  If specified, will check if only one (or none) of the
-##                   Opt_i has been specified.
-##       --Just_One  If specified, will check if just one (or none) of the
-##                   Opt_i has been specified. No other options are allowed.
+##       --Only_One  Check if only one (or none) of the Opt_i has been
+##                   specified.
+##       --Just_One  Check if just one (or none) of the Opt_i has been
+##                   specified. No other options are allowed.
 ##                   Note: all "IS_EXCLUSIVE --Just_One ..." function calls
-##                     must precede any "IS_EXCLUSIVE --Default ...".
-##       --Default   If specified, will set OPTLIST Opt_1 as the default if
-##                   none of Opt_1, Opt_2, Opt_3 ... has been specified.
-##       --Assume    If specified will also set Opt_2, Opt_3, ... if Opt_1
-##                   is used.
-##       --One_Of    If specified, will check if exactly one of the Opt_i
-##                   has been specified.
-##       --All_Of    If specified, will check if all (or none) of the Opt_i
-##                   have been specified.
-##       --At_Least  If specified, will check if at least one of the Opt_i
-##                   has been specified.
-##       --Only_With If specified, will verify the option specified in Opt_1 can
-##                   only be used with the options specified in Opt_2, Opt_3 ...
-##       --Not_With  If specified, will check that the option specified in Opt_1
-##                   must not be paired with any of the options specified in
-##                   Opt_2, Opt_3 ...
+##                   must precede any "IS_EXCLUSIVE --Default ..." call..
+##       --Default   Set Opt_1 as the default if  none of Opt_1, Opt_2,
+##                   Opt_3 ... has been specified.
+##       --Assume    If Opt_1 is used, also set Opt_2, Opt_3, ...
+##       --One_Of    Check if exactly one of the Opt_i has been specified.
+##       --All_Of    Check if all (or none) of the Opt_i have been specified.
+##       --At_Least  Check if at least one of the Opt_i has been specified.
+##       --Only_With Verify Opt_1 can only be used with  Opt_2, Opt_3 ...
+##       --Not_With  Check that Opt_1 must not be paired with any of the
+##                   options specified in Opt_2, Opt_3 ...
 ##       --Paired_With[=N]
-##                   If specified, will check that any N options specified in
-##                   Opt_2, Opt_3 ... must be used with Opt_1. N defaults to 1
-##       --Strict    If specified, modifies the test by counting every occurrence
-##                   of Opt_i. By default IS_EXCLUSIVE tests if any single Opt_i
-##                   has been specified at least once. --Strict ensures only one
+##                   Check that any N of the options Opt_2, Opt_3 ... must be
+##                   used with Opt_1. N defaults to 1
+##       --Strict    Modifie the test by counting every occurrence of Opt_i.
+##                   By default IS_EXCLUSIVE tests if any single Opt_i has
+##                   been specified at least once. --Strict ensures only one
 ##                   occurrence of any Opt_i was specified.
 ##   NOTE: This function assumes the script arguments have been parsed by the
 ##      function GET_ARGS above.
@@ -4071,6 +4069,9 @@ function IS_UUID() {
 ##         directory is made until a matching directory is found or the root
 ##         directory is reached.
 ##     MOUNT_OPTIONS are any options acceptable to the mount command.
+##   Note: The entries in /etc/fstab must include the "user" option. Examples:
+##     asus:/data     /mnt ext4 defaults,noauto,rw,user 0 0
+##     UUID=1a9...6cd /mnt vfat defaults,noauto,rw,user 0 0
 
 unset _MOUNTED_FS_ARRAY_ ; declare -a _MOUNTED_FS_ARRAY_
 _MOUNTED_FS_ARRAY_IDX_="0"
@@ -4223,14 +4224,14 @@ function UMOUNT_IT() {
 ##________________________________________________________________________________
 ##
 ## PAD_IT - Displays a string padded to a specific LENGTH with PAD.
-##   Usage: PAD_IT [-L LENGTH ] [-P PAD ] [-R] [-T] [-V VAR] STRING
+##   Usage: PAD_IT [-L LENGTH ] [-P PAD ] [-RJ] [-T] [-V VAR] STRING
 ##   Where:
 ##     STRING Is the string to be padded.
 ##  -L LENGTH Is the length of the output string. The default LENGTH is 8.
 ##     -P PAD Is a string of 1 or more characters used to pad STRING to
 ##            length LENGTH. The default PAD is a single space " ".
-##         -R Right justified. Place the padding before STRING. The default
-##            is to pad on the left (after STRING).
+##        -RJ Right justified. Place the padding before STRING. The default
+##            is to pad after the STRING (left justified).
 ##         -T Truncate overlength STRING on the left if -R otherwise truncate
 ##            on the right.
 ##         -V VAR Store the result in variable VAR rather than displaying it.
@@ -4241,7 +4242,7 @@ function PAD_IT() {
     case "$1" in
       -L) LenResult="${2}" ; shift 2 ;;
       -P) PadStr="${2}"    ; shift 2 ;;
-      -R) RightJust="1"    ; shift 1 ;;
+     -RJ) RightJust="1"    ; shift 1 ;;
       -T) Truncate="1"     ; shift 1 ;;
       -V) Var="$2" ; unset ${Var} ; shift 2 ;;
        *) break ;;
@@ -4953,7 +4954,7 @@ function ZERO_FILL() {
        *) break ;;
     esac
   done
-  PAD_IT -R ${VarOption} -L ${Num} -P "0" "$1"		# Pad NUMBER to the left with zeros
+  PAD_IT -RJ ${VarOption} -L ${Num} -P "0" "$1"		# Pad NUMBER to the left with zeros
 }
 
 ##________________________________________________________________________________

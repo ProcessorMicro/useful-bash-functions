@@ -55,7 +55,7 @@ ASK can interact with the user with a text-based interface or a GUI dialog box i
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[GET_ARGS](#get-args)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Examples of Help Implemented by GET_ARGS](#example-of-help)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[IS_EXCLUSIVE](#is-exclusive)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Example of GET_ARGS and IS_EXCLUSIVE working together](#example-of-get-args)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Example of GET_ARGS and IS_EXCLUSIVE working together](#example-of-get-args)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASK Functions](#ask-functions)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TMP_FILE_CREATE Functions](#tmp-file-create-functions)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[Examples of Functions](#examples-of-functions)<br>
@@ -71,6 +71,7 @@ ASK can interact with the user with a text-based interface or a GUI dialog box i
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[PAUSE](#pause)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[PROGRESS](#progress)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SORT_ARGS & SORT_ARGS_WS](#sort-args-ws)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[FUNCTIONS](#functionsexample)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[Bugs](#bugs)<br>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
@@ -138,7 +139,7 @@ which are installed in the directory /etc/profile.d (`<WHERE_ETC_DIR>`).
 > In this README, the terms `<WHERE_BIN_DIR>` and `<WHERE_ETC_DIR>` are used in some pathnames.
 They have different values depending upon whether you used a user install or a system install.
 >
-> | TERM | User Install | System install |
+> | TERM | User Install | System Install |
 > |--|--|--|
 > | <WHERE_BIN_DIR> | ~/bin | /usr/local/bin |
 > | <WHERE_ETC_DIR> | ~/bin | /etc/profile.d |
@@ -174,20 +175,21 @@ python -m zipfile -e main.zip .    # Unzip the downloaded file
 > 
 > 2. Locate the downloaded file `main.zip`.
 > 
-> 3. Right-click on `main.zip` and select **Extract to here** (or similar wording).
+> 3. Right-click on `main.zip` and select **Extract**.  
+Then select **Extract to here** (or similar wording).
 
 #### Step 3
 
-Install the distribution either for just one user or for all users.
+Install the distribution either for just one user (User Install) or for all users (System Install).
 
-#### Step 3a - User install (recommended)
+#### Step 3a - User Install (Recommended)
 
 ```bash
 cd useful-bash-functions-main      # Change your workng directory
 bash ./install.sh                  # And install it for your use only
 ```
 
-#### Step 3b - System install
+#### Step 3b - System Install
 
 ```bash
 # Open a terminal session as "root"
@@ -216,7 +218,7 @@ Install `bash` and re-execute `install.sh`.
 `MKSCRIPT` creates a script "template" and inserts YOUR copyright notice into the generated script.
 To reflect your needs for the generated copyright, edit the file `<WHERE_BIN_DIR>/MKSCRIPT`.
 
-- Modify the generated name:
+- Modify the generated name by changing the following line:
 
 ```bash
 DEFAULT_NAME="Mike Armstrong"
@@ -526,7 +528,7 @@ It has three basic purposes:
 | FEATURE | GET_ARGS FEATURE DEXCRIPTION |
 |--|--|
 | --Opt_D | Options available to the parent script are defined with the GET_ARGS_DIRECTIVES pair `--Opt_D "..."` and `--Des_D "..."`.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(`--Option_Definition` and `--Description_Definition`). |
-| --Des_D | Each defined option has a description that specifies the purpose of that option.<br>The description is formatted and displayed in the help display.
+| --Des_D | Each defined option has a description that specifies the purpose of that option. The description is formatted and displayed in the help display.
 | Options | Options can be single character `-a` or multiple character `--all`. |
 | Multiple Spellings | Any option can be defined to have several spellings (`-a` and `--all` and ...). |
 | Option Values | Any option can be defined (and enforced) with: no value, a required value or an optional value. |
@@ -559,14 +561,10 @@ Before we look at an example of the coding for `GET_ARGS` we will use help for `
 
 ```bash
 FIND-FUNCTIONS -h              # This displays the help text in the global default mode.
-````
+```
 
 ```bash
 FIND-FUNCTIONS -he             # This displays the help text in expanded mode.
-````
-
-```bash
-FIND-FUNCTIONS -He             # So will this but paged with "less".
 ```
 
 ```bash
@@ -578,12 +576,12 @@ FIND-FUNCTIONS --HELP=c        # An example of compressed and paged output (or u
 ```
 
 ```bash
-FIND-FUNCTIONS -hb             # Brief (not paged) help displaying help sections:
+FIND-FUNCTIONS -Hb             # Brief, paged help displaying help sections:
                                #   purpose, synopsis and options.
 ```
 
-Note: The brief help "options" lines are not wrapped.
-Use keyboard keys &rarr; and &larr; to view long lines.
+> [!NOTE]
+> The brief help "options" lines are not wrapped. Use keyboard keys &rarr; and &larr; to view long lines.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
 
@@ -594,16 +592,20 @@ When an `IS_EXCLUSIVE` rule is violated, an error message summarizing the proble
 
 Basic `IS_EXCLUSIVE` functionality is summarized as follows:
 
-| IS_EXCLUSIVE FEATURES |
-|--|
-| Verify that in a set of options only one option may be specified. |
-| Verify that a set of options must be used together. |
-| Verify that an option cannot be used with any other option. |
-| Verify that an option must be paired with any of a list of options.
-| Verify that an option must not be paired with any of a list of options.
-| Supply a default option if none of a list of options is specified. |
-| Verify the allowed number of times an option may be used on the command line. |
-| Additional more specific capabilities are also available.  |
+| Arg 1 TYPE  | OPTIONS LIST |
+|--|--|
+| <empty>     | The options are mutually exclusive (only one can be specified). |
+| Only One    | Only one (or none) of the options can be specified. |
+| Just One    | Just one (or none) of the options must be specified. No other options are allowed. |
+| Default     | Set option 1 as the default if none of option 1, option 2, ... is specified. |
+| Assume      | Set option 2, option 3, ... if option 1 is used. |
+| One Of      | check if exactly one of the options have been specified. |
+| All Of      | check if all (or none) of the options have been specified. |
+| At Least    | check if at least one of the options have been specified. |
+| Only With   | Option 1 can only be used with the options specified in option 2, option 3 ... |
+| Not With    | Option 1 must not be paired with any of the options specified in option 2, option 3 ... |
+| Paired With | The list of options must be used together. |
+
 
 Full documentation of `IS_EXCLUSIVE` can be viewed by:
 
@@ -616,30 +618,11 @@ functions.sh IS_EXCLUSIVE
 #### <a id="example-of-get-args">Example of GET_ARGS and IS_EXCLUSIVE working together</a>
 
 To see how `GET_ARGS` and `IS_EXCLUSIVE` work together and to see some other features we will use the `FIND-FUNCTIONS` command.
-Within the script `FIND-FUNCTIONS` you can see the coding that generates the help that is displayed by:
 
-```bash
-FIND-FUNCTIONS -H
-```
+##### <a id="find-functions-hidden-option">FIND-FUNCTIONS Hidden Option</a>
 
-View the source code with:
-
-```bash
-vim <WHERE_BIN_DIR>/FIND-FUNCTIONS
-```
-
-`FIND-FUNCTIONS` has a hiddden option --list (it is not displayed by help) that displays a list of the generated variables and the  possibile spellings of all the options defined by GET_ARGS within the script.
-Type:
-
-```bash
-FIND-FUNCTIONS --list                # Calls the GET_ARGS_LIST_OPTIONS function
-```
-
-#### <a id="find-functions-hidden-option">FIND-FUNCTIONS Hidden Option</a>
-
-`FIND-FUNCTIONS` also has a hidden option --highlight that uses the `GET_ARGS_HIGHLIGHT` function.
-This invokes a rather complex egrep pattern to display and highlight how `functions.sh` is used within `FIND-FUNCTIONS`.
-
+`FIND-FUNCTIONS` has a hidden option `--highlight` (it is not displayed by help) that uses the `GET_ARGS_HIGHLIGHT` function.
+This invokes a rather complex egrep pattern to display and highlight how `functions.sh` is used within `FIND-FUNCTIONS`.  
 So type:
 
 ```bash
@@ -684,11 +667,25 @@ The table below gives a description of the lines containing highlights.
 | 119-126 | ${TEST_CMD}           | Causes the command line to be displayed if option `--test` (`-t`) was used. Otherwise the command is executed. Useful for testing a script. |
 | 129 | ERROR                     | A function that displays the error message and immediately exits `FIND-FUNCTIONS`. |
 
+`FIND-FUNCTIONS` has another hiddden option `--list` (it is not displayed by help) that displays a list of the generated variables and the  possibile spellings of all the options defined by GET_ARGS within the script.
+Type:
+
+```bash
+FIND-FUNCTIONS --list                # Calls the GET_ARGS_LIST_OPTIONS function
+```
+
+Within the script `FIND-FUNCTIONS` you can see the coding that generates the help that is displayed by:
+
+```bash
+FIND-FUNCTIONS -H
+```
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
 
 ### <a id="ask-functions"><br>&nbsp;&nbsp;&nbsp;&nbsp;ASK Functions</a>
 
-The basic functionality of the set of `ASK` functions (`ASK`, `ASK_GUI`, `ASK_WITH_MENU`, `ASK_WITH_MENU_GUI`) is to display statements or questions to a user and to record the response.
+The basic functionality of the set of `ASK` functions (`ASK`, `ASK_GUI`, `ASK_WITH_MENU`, `ASK_WITH_MENU_GUI`)
+is to display statements or questions (the prompt) to a user and to record the response.
 The response can be verified against a set of acceptable responses.
 In which case the `ASK` function loops until a correct response is entered or a `quit` is requested.
 The first argument to `ASK` specifies the type of response expected (numeric, word, ...).
@@ -698,8 +695,9 @@ It defines both the type of response and the type of choices available.
 
 | FEATURE | EXPLANATION |
 |--|--|
+| Prompt | The prompt is fully configurable and can include a header, instructions, a legend, a list of choices or just ":&nbsp;" |
 | Responses | Expected response types can be: yes or no, a number, a character (UPPER CASE, lower case, mixed case, alphanumeric or any character), a range, a word, a phrase or anything at all, |
-| Answers | `ASK` verifies that the response matches the type and/or is one of the choices. |
+| Choices | `ASK` verifies that the response matches the type and/or is one of the choices. |
 | Verification | If it is not, `ASK` displays an error message and re-prompts for an answer. |
 | Quit | `ASK` always recognizes a "quit" response (usually "q") that exits the parent script with an error code. |
 | Default Answer | You can configure `ASK` to have a default result inserted for a null (empty) response. |
@@ -819,7 +817,7 @@ RUNME ASK -a -C "A B C x-z d thru g D"
 ASK has much more functionality. To see the full documentation type:
 
 ```bash
-functions ASK         # Shows (with `less`) the documentation for the `ASK` function.
+functions.sh ASK         # Shows (with `less`) the documentation for the `ASK` function.
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
@@ -889,7 +887,7 @@ RUNME ASK_WITH_MENU -V QED -M -H "\n\tMake your choice\n" Array
 
 The results are displayed.
 Notice that for an associative Array the order of the elements is non-determinant.
-Add the option `-S` (before `Array`) to sort the Array indices or -S=r for a reverst sort.
+Add the option `-S` (before `Array`) to sort the Array indices or -S=r for a reverse sort.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     [contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
 
@@ -975,19 +973,23 @@ The following examples show some of the capability available.
 The functions related to colors are interesting. Try:
 
 ```bash
-FIND-FUNCTIONS -f '.*COLOR.*'              # Display the function names containing "COLOR"
+# Display the function names containing "COLOR"
+FIND-FUNCTIONS -f '.*COLOR.*'
 ```
 
 ```bash
-FIND-FUNCTIONS -c -l ".*COLOR.*"           # Display the comments (help) for the COLOR functions
+# Display the comments (help) for the COLOR functions
+FIND-FUNCTIONS -c -l ".*COLOR.*"
 ```
 
 ```bash
-FIND-FUNCTIONS -l ".*COLOR.*"              # Now display the code
+# Now display the code
+FIND-FUNCTIONS -l ".*COLOR.*"
 ```
 
 ```bash
-RUNME COLORS_DISPLAY                    # See the built-in colors
+# See the built-in colors
+RUNME COLORS_DISPLAY
 ```
 
 ```bash
@@ -1016,11 +1018,13 @@ RUNME WARNING "This is a warning message.\nThe correct..."
 The next three functions deal with spaces and zeros surrounding a string.
 
 ```bash
-FIND-FUNCTIONS -c -l PAD_IT TRIM ZERO_FILL
+# Help for the three functions: PAD_IT TRIM ZERO_FILL
+functions.sh PAD_IT TRIM ZERO_FILL
 ```
 
 ```bash
-RUNME PAD_IT -V RESULT -L 6 "abc"           # Padding left justified (the default), 6 charaters
+# Padding left justified (the default), 6 charaters
+RUNME PAD_IT -V RESULT -L 6 "abc"
 ```
 
 ```bash
@@ -1028,23 +1032,28 @@ RUNME PAD_IT -V RESULT -L 15 -P "HO " "Santa: "
 ```
 
 ```bash
-RUNME PAD_IT -R -V RESULT -L 9 abc          # Padding right justified, 9 characters
+# Padding right justified, 9 characters
+RUNME PAD_IT -RJ -V RESULT -L 9 abc
 ```
 
 ```bash
-RUNME TRIM -V RESULT  "   abc def   "       # Trim surrounding whitespace
+# Trim surrounding whitespace
+RUNME TRIM -V RESULT  "   abc def   "
 ```
 
 ```bash
-RUNME TRIM -V RESULT -L "   abc def   "     # Trim (-L) the whitespace on the left
+# Trim (-L) the whitespace on the left
+RUNME TRIM -V RESULT -L "   abc def   "
 ```
 
 ```bash
-RUNME TRIM -V RESULT -R "   abc def   "     # Trim (-R) the whitespace on the right
+# Trim (-R) the whitespace on the right
+RUNME TRIM -V RESULT -R "   abc def   "
 ```
 
 ```bash
-RUNME ZERO_FILL -V RESULT -L 6 123          # Zero fill on the left
+# Zero fill on the left
+RUNME ZERO_FILL -V RESULT -L 6 123
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
@@ -1055,7 +1064,8 @@ RUNME ZERO_FILL -V RESULT -L 6 123          # Zero fill on the left
 The function `PAUSE` is a simple way to "wait and continue".
 
 ```bash
-FIND-FUNCTIONS -c PAUSE               # View the documentation
+# View the documentation
+FIND-FUNCTIONS -c PAUSE
 ```
 
 ```bash
@@ -1070,18 +1080,17 @@ The function `PROGRESS` can be used within a loop to indicate your script is 'th
 It displays (on /dev/stderr) a dot "." every time it is executed.
 
 ```bash
-FIND-FUNCTIONS -c PROGRESS            # View the documentation
+# View the documentation
+FIND-FUNCTIONS -c PROGRESS
 ```
 
-```bash
-FUNCTIONS                             # Load `functions.sh` into the environment
-```
+The following is an example of how PROGRESS could be used.
 
 ```bash
 PROGRESS 2                            # Setup to display "." every 2 iterations
 echo -n "Processing your request. Please wait: "
-for (( i=1 ; i<=20 ; i++ )) ; do      # A 20-times loop
-  sleep 0.5                             # Simulate "work"
+for (( i=1 ; i<=10 ; i++ )) ; do      # A 10-times loop
+  sleep 0.5                           # Simulate "work"
   PROGRESS                            # PROGRESS without arguments implements the "." counter
 done
 echo -e "\nFinished."
@@ -1089,9 +1098,20 @@ echo -e "\nFinished."
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
 
+#### <a id="functionsexample">FUNCTIONS</a>
+
+If you make changes to `functions.sh` and want to test it out then, before you test, execute the following:
+
+```bash
+# Reload `functions.sh` into the environment
+FUNCTIONS
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
+
 #### <a id="sort-args-ws">SORT_ARGS & SORT_ARGS_WS</a>
 
-`SORT_ARGS` acts like its name - it sorts the arguments.
+`SORT_ARGS` acts like its name: it sorts the arguments.
 The only restriction is no argument can contain whitespace.
 In simple form...
 
@@ -1100,26 +1120,28 @@ RUNME SORT_ARGS ddd ggg qwqq aaa ccc bbb zzz jjj
 ```
 
 Now see what happens to an argument with whitespace.
-We displays the results line-by-line with -L.
+We display the results line-by-line with -L.
+
 ```bash
-RUNME SORT_ARGS -L ddd ggg qwqq aaa ccc bbb zzz "jj j"
+RUNME SORT_ARGS -L 'gg g' 'dd d' 'qw qq' 'a aa'
 ```
 
 The same as above but using `SORT_ARGS_WS`.
+
 ```bash
-RUNME SORT_ARGS_WS -L ddd ggg qwqq aaa ccc bbb zzz "jj j"
+RUNME SORT_ARGS_WS -L 'gg g' 'dd d' 'qw qq' 'a aa'
 ```
 
 Suppose you have an array of file names all of which contain a number.
 And you want to sort them in reverse number order.
-The function `SORT_ARGS_WS` is needed to do this as the names contain whitespace.
+The function `SORT_ARGS_WS` is needed to do this as the "names" in this example contain whitespace.
 But be aware it is more expensive processing wise than `SORT_ARGS`.
 
 First an explanation of the arguments to the `SORT_ARGS_WS` examples below.
 
 | ARGUMENT | EXPLANATION |
 |--|--|
-| -V SORTED_NAMES | Store the result in SORTED_NAMES. |
+| -V SORTED_NAMES | Store the result into the variable SORTED_NAMES. |
 | -A | And make it an array. |
 | -S "-n -r -t- -k2,2" | Pass options to the `sort` command<br>-n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A numeric sort.<br>-r&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sort in reverse order.<br>-t-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The field separator is "-"<br>-k2,2&nbsp;Sort on the second field |
 | `${FILE_NAMES_ARRAY[@]}` | The contents of the file-name array (requoted) as the remaining arguments. |
