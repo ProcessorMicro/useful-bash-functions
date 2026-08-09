@@ -1,0 +1,204 @@
+#!/bin/bash
+# vim:set number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
+#
+# SCRIPT_PURPOSE describes the purpose of FIND-FUNCTIONS									\
+SCRIPT_PURPOSE="This script will search a script for function(s) matching FUNCTIONPATTERN and display, or open with an editor, the functions coding found or the function comments found."
+# SCRIPT_VERSION Helps keep track of FIND-FUNCTIONS changes. "FIND-FUNCIONS --version" will display this info.		\
+SCRIPT_VERSION="01.01.08 - Jun 16, 2026"
+
+# Copyright (C) 2013-2026 by Mike Armstrong
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy (the file 'LICENSE') of the GNU General Public
+# License along with this program; if not, see <https://www.gnu.org/licenses>.
+
+# Initialize functions.sh if preloaded into the environment. Otherwise locate and load functions.sh
+if (( _functions_sh_loaded_ )) ; then		# Is functions.sh loaded? \
+  FUNCTIONS_SH_INIT				# Yes - initialize functions.sh \
+else						# No - functions.sh is not loaded \
+  COMMON_FUNCTIONS="$(type -p functions.sh)"	# Locate and load functions.sh \
+  [[ -x ${COMMON_FUNCTIONS} ]] && source "${COMMON_FUNCTIONS}" || { echo -e "Cannot locate "${COMMON_FUNCTIONS:-functions.sh}"." 1>&2 ; exit ; } # \
+fi                                                                             \
+
+## FIND-FUNCTIONS - Find the source code or comments for functions in a bash script.
+##                                                                                 .
+##    Type:  FIND-FUNCTIONS -H                      # To view the options available.
+##    Type:  FIND-FUNCTIONS -sc FIND_FUNCTIONS      # To view this comment.
+##    Type:  FIND-FUNCTIONS -t <options>            # Testing mode. Display the "critical"
+##                                                  #   commands that would be executed
+##                                                  #   but don't execute them.
+
+# Define these so their values can be used in the USAGE message.
+CommentPatternPrefix="^##\\s?"
+CommentPatternSuffix="\\s+-\\s?"
+Separator="____________________________________________________________________________________\n\n"
+#																\
+# The following is the GET_ARGS function used within this script (FIND_FUNCTIONS)						\
+# The arguments (GET_ARGS_DIRECTIVES) define the options allowed (with descriptions) and what to do with any non-option		\
+# arguments. The use of the bash continuation " \" at the end of each line makes the GET_ARGS_DIRECTIVES more readable.		\
+GET_ARGS --Args_Array @FUNCTIONPATTERN \
+  --Copyright \
+  --Hid_D "a all"		   --Des_D "Display all comments. This hidden option is a special case only for the script \"${FUNCTIONS_SH_DIR}/${FUNCTIONS_SH_NAME}\"." \
+  --Opt_D "c comments"		   --Des_D "Display comment lines for FUNCTIONPATTERN rather than the function itself." \
+  --Opt_D "cpp: comment-pattern-prefix:@COMMENTPATTERNPREFIX" \
+                                   --Des_D "Display any (comment) lines matching COMMENTPATTERNPREFIX. The default COMMENTPATTERNPREFIX is \"${CommentPatternPrefix}\"." \
+  --Opt_D "cps: comment-pattern-suffix:@COMMENTPATTERNSUFFIX" \
+                                   --Des_D "COMMENTPATTERNSUFFIX is used to help define the first line of a function comment. The default COMMENTPATTERNSUFFIX is \"${CommentPatternSuffix}\"." \
+  --Opt_D "D display"		   --Des_D "Display the matching functions on SYSOUT. This is the default." \
+  --Opt_D "E: editor:@EDITORandOPTIONS[=GUI]" \
+                                   --Des_D "Use EDITOR as the editor. The string EDITORandOPTIONS must include the command and the necessary options to read a file." \
+  --Para O "\tIf EDITOR is GUI-based, EDITORandOPTIONS must be terminated with the string \"=GUI\". This will ensure the contents of the temporary file used is not deleted by the cleanup script until EDITOR terminates." \
+  --Opt_D "f function-names-only"  --Des_D "Only display matching function names (no function contents)." \
+  --Opt_D "G gvim"		   --Des_D "Use gvim as the editor." \
+  --Hid_D "highlight::@LIGHT"	   --Des_D "Highlight salient GET_ARGS and IS_EXCLUSIVE definitions in ${CMD} and exit. Use optional argument LIGHT (any characers) if the terminal background is light." \
+  --Opt_D "i include-prefix"	   --Des_D "Include the COMMENTPATTERNPREFIX in the output. The default is to replace COMMENTPATTERNPREFIX with one space." \
+  --Opt_D "J joe"		   --Des_D "Use joe as the editor." \
+  --Opt_D "K kate"		   --Des_D "Use kate as the editor." \
+  --Opt_D "L l less"		   --Des_D "Display to SYSOUT using \"less\" as a pager." \
+  --Hid_D "list:: ListOptions::@ALLOPTS" \
+                                   --Des_D "Display all possible spellings of the options specified on the command line and exit. If ALLOPTS is not null, display a list of all the options available." \
+  --Opt_D "N nano"		   --Des_D "Use nano as the editor." \
+  --Opt_D "n line-numbers"	   --Des_D "Include line numbers in the output." \
+  --Opt_D "ns no-separator"	   --Des_D "Don't display a separator between functions and comments. The option -n cannot be used with -S." \
+  --Opt_D "s: script:@SCRIPT"	   --Des_D "Search SCRIPT for FUNCTIONPATTERN. If the pathname SCRIPT does not contain any \"/\" it is assumed to be relative to \"${FUNCTIONS_SH_DIR}\". If SCRIPT is missing, the default script \"${FUNCTIONS_SH_DIR}/${FUNCTIONS_SH_NAME}\" is used. To examine a script in the current directory, use the format\"./SCRIPT\"." \
+  --Opt_D "S: separator:@SEP"	   --Des_D "SEP is displayed between functions or comments. SEP must include newlines. The option -S cannot be used with -n. The default separator is:\n\t\t${Separator//\\/\\\\}" \
+  --Opt_D "V vim"		   --Des_D "Use vim as the editor." \
+  --Where "If FUNCTIONPATTERN is missing \".*\" is assumed. If option -a is used, FUNCTIONPATTERN is ignored." \
+  --Info  "Options -a, -D, -E, -G, -J, -K, -l and -N are mutually exclusive." \
+  --Info  "${CMD} locates functions within SCRIPT for lines matching the tokens:\n\t\tfunction <FUNCTIONPATTERN> [()] {\n\t\t\tor\n\t\t<FUNCTIONPATTERN> () {\n\tThe lines may begin with whitespace and the tokens may be separated (or not) by whitespace as required by bash. Lines between each located function and the line ending that function are displayed. FUNCTIONPATTERN is any regex (without the surrounding \"/\") acceptable to gawk." \
+  --Info  "Comments for each function start with a line located with the grep pattern:\n\t\t<COMMENTPATTERNPREFIX><FUNCTIONPATTERN><COMMENTPATTERNSUFFIX>\n\tand continues until a line not beginning with COMMENTPATTERNPREFIX is detected." \
+  --Info  "Option --cpp or --cps implies option -c." \
+  --Info  "For all grep PATTERNS enter any <BACKSLASH> as <BACKSLASH><BACKSLASH>". \
+  --Exam  "For the following (poorly indented functions) in the file Script:
+                 function AAA     {
+                    echo AAA
+                 }
+                    function AAAA() {	# A comment
+                              echo AAAA
+                  }      		# A comment
+                AA   ()   {
+                    echo AA
+                   }
+                 function b () {
+                   echo b
+                 }			# A comment
+               function bBb {
+                 echo bBb
+               }
+               function bbb {
+                 echo bbb ; }
+              bbbb () { echo bbbb ; } # A comment
+        The commands:
+            ${CMD}    -s Script 'AA*'   # Will display functions 'AAA', 'AAAA' and 'AA'.
+            ${CMD}    -s Script 'b'     # Will display only function 'b'.
+            ${CMD} -K -s Script 'bb.*'  # Will open \'kate\' with all functions beginning with 'bb' in the kate buffer." \
+  -- "$@"					# These two arguments must always be at the end
+
+#														\
+# Ensure combinations of options are valid.									\
+# If not, an error message is issued and FIND-FUNCTIONS is terminated.						\
+IS_EXCLUSIVE --Just_One a			# Option -a, if used, can be the only option.
+IS_EXCLUSIVE --Assume a c l			# Option -a assumes -c and -l so they are "set"
+IS_EXCLUSIVE --Just_One list			# Option --list, if used, can be the only option.
+IS_EXCLUSIVE --Just_One highlight		# Hidden option --highlight, if used, can be the only option.
+IS_EXCLUSIVE D E G J K L N			# Only one of these options can be used at any one time.
+IS_EXCLUSIVE --Default D E G J K L N		# The default is display the output (-D) if -E, -G, -J, -K, -L or -N is not used.
+IS_EXCLUSIVE c f				# Options -c and -f are mutually exclusive.
+IS_EXCLUSIVE ns S				# Options --ns and -S are mutually exclusive.
+IS_EXCLUSIVE --Only_With i c cpp cps		# Option -i can only be used with options -c, --cpp and --cps.
+IS_EXCLUSIVE --Only_With cpp c			# Option --cpp can only be used with option -c.
+IS_EXCLUSIVE --Only_With cps c			# Option --cps can only be used with option -c.
+#														\
+# Test to see which options have been used when FIND-FUNCTIONS was executed.					\
+#														\
+# Display the options used/available for FIND-FUNCTIONS and exit.						\
+# Option --list is defined with "--Hid_D": a hidden option.							\
+(( Opt_list )) && { GET_ARGS_LIST_OPTIONS ${Opt_list_Val} ; exit ; }
+#														\
+# Highlight salent GET_ARGS and IS_EXCLUSIVE definitions in FIND-FUNCTIONS and exit.				\
+# Implemented by the hidden option: --Hid_D "highlight"								\
+(( Opt_highlight )) && { GET_ARGS_HIGHLIGHT ${Opt_highlight_Val:+-L} "${CMD}" ; exit ; }
+#														\
+# Option -a is a special case for functions.sh it causes it to self document.					\
+(( Opt_a )) && { ${COMMON_FUNCTIONS} ; exit ; }
+#														\
+if (( ${#Args[*]} == 0 )) ; then		# Check if there are any arguments
+  Patterns=( ".*" )				# No so set the default pattern (any characters)		\
+else						#								\
+  OldIFS="${IFS}" ; IFS="|" ; set -o noglob	# Set the input field separator to "|'				\
+  Patterns=( ${Args[*]} )			# Separate Args[*] "grep -e" patterns into an array		\
+  IFS="${OldIFS}" ; set +o noglob		# Reset								\
+fi						#								\
+OnlyComments="0"
+#														\
+# Test remaining option variables to see which options have been used when FIND-FUNCTIONS was executed.		\
+#														\
+(( Opt_cpp )) && { CommentPatternPrefix="${Opt_cpp_Val}" ; OnlyComments="1" ; }
+(( Opt_cps )) && { CommentPatternSuffix="${Opt_cps_Val}" ; OnlyComments="1" ; }
+(( Opt_c ))   && OnlyComments="1"
+(( Opt_D ))   && TheOutputCommand="cat"
+(( Opt_f ))   && FunctionNamesOnly="1" || FunctionNamesOnly="0"
+(( Opt_G ))   && { TheOutputCommand="gvim" ; IsGUI="1" ; }
+(( Opt_i ))   && IncludePrefix="1" || IncludePrefix="0"
+(( Opt_J ))   && TheOutputCommand="joe"
+(( Opt_K ))   && { TheOutputCommand="kate" ; IsGUI="1" ; }
+(( Opt_L ))   && TheOutputCommand="less"
+(( Opt_n ))   && IncludeLineNumbers="1" || IncludeLineNumbers="0"
+(( Opt_N ))   && TheOutputCommand="nano"
+(( Opt_S ))   && Separator="${Opt_S_Val}"
+(( Opt_V ))   && TheOutputCommand="vim"
+(( Opt_ns ))  && IncludeSeparator="0" || IncludeSeparator="1"
+if (( Opt_E )) ; then
+  if [[ ${Opt_E_Val} =~ =GUI$ ]] ; then
+    TheOutputCommand="${Opt_E_Val%=GUI}"
+    IsGUI="1"
+  else
+    TheOutputCommand="${Opt_E_Val}"
+  fi
+fi
+if (( Opt_s )) ; then
+  # A script pathname that doesn't contain any "/" is assumed to be in the same directory as "functions.sh"
+  [[ ${Opt_s_Val} =~ / ]] && Script="${Opt_s_Val}" || Script="${FUNCTIONS_SH_DIR}/${Opt_s_Val}"
+else
+  # If no script is specified, it is assumed to be /usr/local/bin/functions.sh
+  Script="${FUNCTIONS_SH_DIR}/${FUNCTIONS_SH_NAME}"
+fi
+
+gawkScript="$(type -p .${CMD}.gawk)"			# Identify the script
+
+TMP_FILE_CREATE gawkOUT
+
+# Process each PATTERN separately as patterns have too many special characters.
+while read -u 3 Pattern ; do
+  #											 			\
+  # Use gawk (creating variables from the parsed options) to generate the requested output.			\
+  # When "FIND-FUNCTIONS --test" is executed, ${TEST_CMD} causes the command to be printed 			\
+  #   rather than executed. Useful for debugging.					 			\
+  ${TEST_CMD} gawk ${DEBUG:+-D}								 			\
+    -v Pattern="${Pattern}"		-v FunctionNamesOnly="${FunctionNamesOnly}"				\
+    -v Separator="${Separator}"		-v IncludeFirstSeparator="${IncludeFirstSeparator}"			\
+    -v OnlyComments="${OnlyComments}"   -v IncludeSeparator="${IncludeSeparator}"				\
+    -v IncludePrefix="${IncludePrefix}" -v IncludeLineNumbers="${IncludeLineNumbers}"	 			\
+    -v CommentPatternPrefix="${CommentPatternPrefix//\\/\\\\}"				 			\
+    -v CommentPatternSuffix="${CommentPatternSuffix//\\/\\\\}"				 			\
+    --file "${gawkScript}" "${Script}"									      # \
+  IncludeFirstSeparator="0"			# So we only do it once
+done 3< <( set -o noglob ; printf "%s\n" ${Patterns[*]} ) > "${gawkOUT}"
+#														\
+# Ensure the selected editor is available.									\
+type -p ${TheOutputCommand} >& /dev/null || ERROR "The editor \"${TheOutputCommand}\" is not installed on your system."
+#														\
+# Finally present the output as requested (display or edit...)							\
+${TEST_CMD} ${TheOutputCommand} "${gawkOUT}"
+EditorPID=$!
+if (( IsGUI )) ; then
+  sleep 2
+  wait ${EditorPID}
+fi

@@ -1,0 +1,93 @@
+#!/bin/bash
+# vim:set number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
+
+SCRIPT_PURPOSE="This script will create a new bash script using a basic template."
+SCRIPT_VERSION="01.03.08 - May 26, 2026"
+
+# Copyright (C) 2013-2026 by Mike Armstrong
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy (the file 'LICENSE') of the GNU General Public
+# License along with this program; if not, see <https://www.gnu.org/licenses>.
+
+# Initialize functions.sh if preloaded into the environment. Otherwise locate and load functions.sh
+if (( _functions_sh_loaded_ )) ; then		# Is functions.sh loaded?
+  FUNCTIONS_SH_INIT				# Initialize functions.sh
+else						# functions.sh not loaded
+  COMMON_FUNCTIONS="$(type -p functions.sh)"	# Locate and load functions.sh
+  [[ -x ${COMMON_FUNCTIONS} ]] && source "${COMMON_FUNCTIONS}" || { echo -e "Cannot locate "${COMMON_FUNCTIONS:-functions.sh}"." 1>&2 ; exit ; }
+fi
+
+DEFAULT_NAME="Mike Armstrong"
+
+GET_ARGS \
+  --Args_Opt "1@SCRIPTPATHNAME" \
+  --Copyright \
+  --Opt_D "f force"		--Des_D "Overwrite SCRIPTPATHNAME if it exists." \
+  --Opt_D "n: name:@NAME"	--Des_D "Change the name in the copyright notice to NAME. The default NAME is \"${DEFAULT_NAME}\"." \
+  --Where "SCRIPTPATHNAME is the pathname of the script file to be created. It's mode is changed to be executable for everyone (\"ugo+x\"). If SCRIPTPATHNAME is missing the source code is written to sysout." \
+  -- "$@"
+
+if (( ${#Args[*]} )) ; then
+  SCRIPT_PATH="$( realpath "${Args[1]}" )"
+  if [[ -e ${Args[1]} && -z ${Opt_f} ]] ; then
+    ASK --yn "\nScript \"${SCRIPT_PATH}\" exists. Overwrite it?"
+    [[ ${ANSWER} == y ]] || exit
+    cat /dev/null > "${SCRIPT_PATH}"			# Ensure the file is empty
+  fi
+else
+    SCRIPT_PATH="/dev/stdout"
+fi
+
+# ==============================================================
+# = Modify the following copyright information as appropriate. =
+# ==============================================================
+echo -e '#!/bin/bash
+# vim:set number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
+
+SCRIPT_PURPOSE="This script will ..."
+SCRIPT_VERSION="01.01.01 - '$(date "+%b %d, %Y")'"
+
+# Copyright (C) 2013-'$(date "+%Y")' by '${Opt_n_Val:=${DEFAULT_NAME}}'.
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy (the file 'LICENSE') of the GNU General Public
+# License along with this program; if not, see <https://www.gnu.org/licenses>.
+
+# Initialize functions.sh if preloaded into the environment. Otherwise locate and load functions.sh
+if (( _functions_sh_loaded_ )) ; then		# Is functions.sh loaded?
+  FUNCTIONS_SH_INIT				# Initialize functions.sh
+else						# functions.sh not loaded
+  COMMON_FUNCTIONS="$(type -p functions.sh)"	# Locate functions.sh
+  [[ -x ${COMMON_FUNCTIONS} ]] && source "${COMMON_FUNCTIONS}" || { echo -e "Cannot locate "${COMMON_FUNCTIONS:-functions.sh}"." 1>&2 ; exit ; }
+fi
+
+# Sample GET_ARGS
+
+GET_ARGS --Args_Opt 1@INFILE \
+  --Copyright \
+  --Opt_D "o: out-file:@OUTFILE"	--Des_D "OUTFILE is... It defaults to standard output." \
+  --Info "The OUTFILE will contain..." \
+  --Where "If INFILE is missing, input defaults to standard input." \
+  -- "$@"
+
+(( Opt_o )) && echo -e "Option \"-o\" or \"--outfile\" was used to change the output file to \"${Opt_o_Val}\"."
+' > "${SCRIPT_PATH}"
+if (( $# > 0 )) ; then
+  chmod +x "${SCRIPT_PATH}"
+  [[ ${SCRIPT_PATH%/*} == /usr/local/bin ]] && chown root:marmstro "${SCRIPT_PATH}"
+fi
