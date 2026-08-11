@@ -2177,12 +2177,12 @@ function COLORS_DISPLAY() {
   if [[ $1 == "-G" ]] ; then
     COLORS_SET -G
     _FONT_="Source Code Pro 14"
-    yad --title "Default Color Variables" --width=900 --text "<span font=\"${_FONT_}\" style=\"${_FONT_STYLE_}\" size=\"${_FONT_SIZE_}\" weight=\"${_FONT_WEIGHT_}\">
+    yad --title "Default Color Variables" --escape-ok --button=yad-ok --width=900 --text "<span font=\"${_FONT_}\" style=\"${_FONT_STYLE_}\" size=\"${_FONT_SIZE_}\" weight=\"${_FONT_WEIGHT_}\">
     BLK=${BLK}BLK${DEF}      WHI=<span bgcolor=\"black\">${WHI}WHI${DEF}</span>
     RED=${RED}RED${DEF}      PUR=${PUR}PUR${DEF}     GLD=${GLD}GLD${DEF}   BLU=${BLU}BLU${DEF}  GRN=${GRN}GRN${DEF}
     YEL=${YEL}YEL${DEF}      ORG=${ORG}ORG${DEF}     PNK=${PNK}PNK${DEF}   LIM=${LIM}LIM${DEF}   UL=${UL}UL${DEF}
     BOLD=${BOLD}BOLD${DEF}    GREP=${GREP}GREP${DEF} \n
-  The variable \\\$DEF  resets colors and/or styles to the default.\n\n  ${UL}Example:${DEF}    echo -e \\\"Some text \\\${BLU}colored text\\\${DEF} some more text.\\\" \n  Result:i    Some text ${BLU}colored text${DEF} some more text.</span> "
+  The variable \\\${DEF}  resets colors and/or styles to the default.\n\n  ${UL}Example:${DEF}\n    echo -e \\\"Some text, \\\${RED}colored text\\\${DEF}, \\\${UL}\\\${BOLD}underlined bold text\\\${DEF}\\\${DEF} and some more text.\\\" \n  Result:    Some text, ${RED}colored text${DEF}, ${UL}${BOLD}underlined bold text${DEF}${DEF} and some more text.</span> "
   else
     COLORS_SET -T
     echo -e "\t    ${UL}Default Color Variables${DEF}"
@@ -2190,9 +2190,9 @@ function COLORS_DISPLAY() {
     echo -e "GRN=${GRN}GRN${DEF}   YEL=${YEL}YEL${DEF}      ORG=${ORG}ORG${DEF}    PNK=${PNK}PNK${DEF}   LIM=${LIM}LIM${DEF}"
     echo -e "WHI=${WHI}WHI${DEF}    UL=${UL}UL${DEF}      BOLD=${BOLD}BOLD${DEF}  GREP=${GREP}GREP${DEF}"
     echo -e "\nThe variable \$DEF resets colors and/or styles to the default."
-    echo -e "\n\t\t    ${UL}Example${DEF}"
-    echo -e "Command: echo -e \"Text \${LIM}colored \${UL}and underlined text\${DEF} some more text."
-    echo -e "Result:  Text ${LIM}colored ${UL}and underlined text${DEF} some more text."
+    echo -e "\n${UL}Example${DEF}"
+    echo -e "    echo -e \"Some text, \${LIM}colored text\${DEF}, \${UL}\${GLD}underlined gold text\${DEF}\${DEF} and some more text.\""
+    echo -e "Result:  Some text, ${LIM}colored text${DEF}, ${UL}${GLD}underlined gold text${DEF}${DEF} and some more text."
   fi
 }
 
@@ -2207,8 +2207,9 @@ function COLORS_DISPLAY() {
 ##     -T Use <ESC> sequences for the default color variables. Suitable for
 ##    -TR Force reset of the <ESC> sequences color variables
 ##        "echo -e ...". This is the default.
-##   The default color variables are:
-##     BLK WHI RED PUR GLD BLU GRN YEL ORG PNK LIM WHI UL BOLD GREP
+##   The default color variables are set for a dark background and any be
+##     modified for light backgrounds. They are:
+##       BLK WHI RED PUR GLD BLU GRN YEL ORG PNK LIM WHI UL BOLD GREP
 ##   Also $DEF resets colors and/or styles to the default.
 function COLORS_SET() {
   if [[ ${1:0:2} == -G ]] ; then			# Colors for "yad ..."
