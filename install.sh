@@ -129,7 +129,8 @@ else
   ForWho="$( id -u -n )"
 fi
 
-read -p "\nDo you really want to ${WhoAmIaction} ${Ubf} (y, n)? " Ans
+echo
+read -p "Do you really want to ${WhoAmIaction} ${Ubf} (y, n)? " Ans
 [[ ${Ans,,} == y ]] || exit
 
 if [[ ${WhoAmI} == install.sh ]] ; then

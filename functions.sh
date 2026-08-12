@@ -30,18 +30,20 @@ COMMON_FUNCTIONS_VERSION="14.01.09 - Aug 08, 2026"
 ##   To do this create a file in /etc/profile.d/ with the contents:
 ##
 ##     #!/bin/bash
-##     source /usr/local/bin/functions.sh
+##     source $(type -p functions.sh)
 ##     declare -x BASH_ENV="${BASH_SOURCE[0]}"
 ##
 ##   This will load the functions and export them into the bash environment.
 ##
 ## FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
-##   This script, installed in the directory /etc/profile.d, implements this.
+##   This script, installed in /etc/profile.d (or ~/bin), implements this.
 ##   It also defines some global defaults used by the GET_ARGS function.
 ##
 ##   For more information on these variables execute:
-##
+##   a)  For a system install:
 ##     FIND-FUNCTIONS -c -l -s /etc/profile.d/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
+##   b)  Or for a user install:
+##     FIND-FUNCTIONS -c -l -s ~/bin/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
 ##
 ## PARENT SCRIPT IMPLEMENTATION
 ##   In each parent script that will use the GET_ARGS function, the
@@ -96,6 +98,7 @@ FUNCTIONS_SH_DIR="${FUNCTIONS_SH_PATH%/*}"		# The directory containing this comm
 FUNCTIONS_SH_SHARED_DIR="${FUNCTIONS_SH_DIR}"		# Shared data for the user defined scripts "data"
 FUNCTIONS_SH_BASENAME="${FUNCTIONS_SH_NAME%%.NEW}"
 FUNCTIONS_SH_SUFFIX="${FUNCTIONS_SH_NAME##${FUNCTIONS_SH_BASENAME}}"
+FUNCTIONS_SH_PAGER="${FUNCTIONS_SH_PAGER:=less}"	# Ensure a pager command is set
 
 function DO_HELP() {
   local _FUNCTIONS_SH_="${FUNCTIONS_SH_DIR}/${FUNCTIONS_SH_NAME}"
@@ -103,12 +106,11 @@ function DO_HELP() {
     echo -e "Purpose: ${SCRIPT_PURPOSE_FUNCTIONS_SH}\nVersion: ${COMMON_FUNCTIONS_VERSION}"
   elif (( $# )) ; then
     FIND-FUNCTIONS -l -c -s "${_FUNCTIONS_SH_}" "$@"
-echo    FIND-FUNCTIONS -l -c -s "${_FUNCTIONS_SH_}" "$@"
   else
     grep --line-number '^##' "${_FUNCTIONS_SH_}" \
       |  sed -e 's/##[ _]\?//' \
       |  column --separator ":" --output-separator " " --table --table-right 1 --table-columns-limit 2 \
-      |& less -R -S
+      |& ${FUNCTIONS_SH_PAGER} -R -S
   fi
 }
 # Check to see if it has been executed as a command
@@ -2028,7 +2030,9 @@ function CLEANUP_ALWAYS() {
 ##       To change them to pango markup, execute: COLORS_SET -G
 ##     The following is the default location of the color table used to convert
 ##       a color code or name to another format. the pathname for COLORFILE is:
-##         /usr/local/share/functions.sh/.functions.sh.COLOR_MAKE.ColorTable.txt
+##         /usr/local/bin/functions.sh/.functions.sh.COLOR_MAKE.ColorTable.txt
+##                      OR
+##         ~/bin/functions.sh/.functions.sh.COLOR_MAKE.ColorTable.txt
 ##       The file contains a header and 256 lines consisting of five columns:
 ##          1) The X-term index (code)
 ##          2) The X-term color name
@@ -2058,7 +2062,7 @@ function COLOR_MAKE() {
     _PRE_T_="["   _PRE_TF_="38;5;"        _PRE_TB_="48;5;"        _CLOSE_T_=""     _POST_T_="m" _DEF_T_="[0m"
                 _PRE_TF_RGB_="38;2;"    _PRE_TB_RGB_="48;2;"
   fi
-  [[ " $* " =~ " -D " ]] && { less -R "${_COLOR_FILE_}" ; return ; }
+  [[ " $* " =~ " -D " ]] && { ${FUNCTIONS_SH_PAGER} -R "${_COLOR_FILE_}" ; return ; }
   [[ " $* " =~ " -W " ]] && Warning="1"			# Pre-scan
   if [[ " $* " =~ " -G " ]] then			# Pre-scan
     Gui=1
@@ -2212,12 +2216,16 @@ function COLORS_DISPLAY() {
 ##       BLK WHI RED PUR GLD BLU GRN YEL ORG PNK LIM WHI UL BOLD GREP
 ##   Also $DEF resets colors and/or styles to the default.
 function COLORS_SET() {
-  if [[ ${1:0:2} == -G ]] ; then			# Colors for "yad ..."
+  if [[ ${1:0:2} == -G ]] ; then
     if [[ -z ${_RED_G_} || ${1} == -GR ]] ; then # Only do it once or if forced
+      # =============================
+      # = Colors for "yad ..."      =
+      # =============================
       _RED_G_=Red     _PUR_G_=Purple       _GLD_G_=Gold1         _BLU_G_=DodgerBlue1 _GRN_G_=DarkCyan
       _YEL_G_=Yellow1 _ORG_G_=DarkOrange   _PNK_G_=MediumOrchid1 _LIM_G_=Chartreuse1 _GREP_G_=Magenta1
-      _BLK_G_=black			   _WHI_G_="White"
-      _UL_G_=" underline=\"single\""      _BOLD_G_="weight=\"bold\""
+      _BLK_G_=black			   _WHI_G_=White
+      _UL_G_=" underline=\"single\""      _BOLD_G_=" weight=\"bold\""
+      # =============================
     fi
     export RED="<span fgcolor=\"${_RED_G_}\">"  PUR="<span fgcolor=\"${_PUR_G_}\">"
     export GLD="<span fgcolor=\"${_GLD_G_}\">"  BLU="<span fgcolor=\"${_BLU_G_}\">"
@@ -2227,11 +2235,15 @@ function COLORS_SET() {
     export BLK="<span fgcolor=\"${_BLK_G_}\">"  WHI="<span fgcolor=\"${_WHI_G_}\">"
     export  UL="<span ${_UL_G_}>"              BOLD="<span ${_BOLD_G_}>"
     export DEF="</span>"
-  else							# Colors for "echo -e ..."
+  else
     if [[ -z ${_RED_T_} || ${1} == -TR ]] ; then # Only do it once or if forced
+      # =============================
+      # = Colors for "echo -e ..."  =
+      # =============================
       _RED_T_=198  _PUR_T_=129 _GLD_T_=220 _BLU_T_=33   _GRN_T_=36
       _YEL_T_=226  _ORG_T_=208 _PNK_T_=207 _LIM_T_=118 _GREP_T_=201
        _UL_T_=4   _BOLD_T_=1   _BLK_T_=0   _WHI_T_=255
+      # =============================
     fi
     export RED="[38;5;${_RED_T_}m"  PUR="[38;5;${_PUR_T_}m"
     export GLD="[38;5;${_GLD_T_}m"  BLU="[38;5;${_BLU_T_}m"
@@ -3321,8 +3333,11 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##         GAth      # Default TITLE highlight
 ##         GAah      # Default ACTION highlight
 ##
-##     For more information on these variables execute:
-##       FIND-FUNCTIONS -c -l -s /etc/profile.d/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
+##   For more information on these variables execute:
+##   a)  For a system install:
+##     FIND-FUNCTIONS -c -l -s /etc/profile.d/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
+##   b)  Or for a user install:
+##     FIND-FUNCTIONS -c -l -s ~/bin/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
 ##
 ##   MODIFICATIONS AND TESTING
 ##     After making modifications to functions.sh and before testing them, type
@@ -3407,7 +3422,7 @@ function GET_ARGS_DEFAULT() {
   _SAVE_VARIABLES_+=" -v SAVEgawkScript=${_SAVED_GAWK_} -v SAVEbashScript1=${_SAVED_BASH1_} -v SAVEbashScript2=${_SAVED_BASH2_} "
 
   _GAWK_VARIABLES_="  -v BashCmd=${CMD} -v BashTabStop=${_TAB_STOPS_} -v BashColumns=${COLUMNS} -v BashIsUsageExit=${_IS_USAGE_EXIT_} "
-  _GAWK_VARIABLES_+=" -v GAah=${GAah} -v GArs=${DEF} -v GAoh=${GAoh} -v GAsh=${GAsh} -v GAth=${GAth} "
+  _GAWK_VARIABLES_+=" -v BashPager=${FUNCTIONS_SH_PAGER} -v GAah=${GAah} -v GArs=${DEF} -v GAoh=${GAoh} -v GAsh=${GAsh} -v GAth=${GAth} "
 
   # The output of the gawk script (${_SAVED_GAWK_=}) is sourced to set the parsed, parent script option/arguments variables.
   ( cd "${FUNCTIONS_SH_DIR}"
@@ -3434,7 +3449,7 @@ function GET_ARGS_DEFAULT() {
 ##         -D The terminal background is dark. This is the default
 ##         -L The terminal background is light.
 ##     SCRIPT is the pathname of a script using GET_ARGS and IS_EXCLUSIVE.
-##            The default script directory is /usr/local/bin.
+##            The default script directory is /usr/local/bin (or ~/bin ).
 ##   GET_ARGS_HIGHLIGHT looks for and displays keywords in a script related to
 ##     the functions GET_ARGS, IS_EXCLUSIVE and TEST. It also displays any lines
 ##     containing a comment that ends  with " \".
@@ -3451,7 +3466,7 @@ function GET_ARGS_HIGHLIGHT() {
   (( dark )) && export GREP_COLORS="ms=38;5;10:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36"
   { echo -e "# GET_ARGS highlights for script \"${UL}$( realpath ${Script})${DEF}\".\n#"
     grep -E 'SCRIPT_[PV].*=|COMMON_FUNCTIONS|_functions_sh_loaded_|FUNCTIONS_SH_INIT|GET_ARGS[A-Z_]*|--[A-Z][A-Za-z_]+|\\$| -- "\$@"|Opt_[[:alpha:]_]+|\$\{#?Args[[].{1,20}]\}|IS_EXCLUSIVE|\$\{TEST_.{2,3}\}|\$\{CMD.{0,4}\}|IS_TESTING|WARNING |ERROR ' "${Script}" --color=always
-  } | less -N -R -S
+  } | ${FUNCTIONS_SH_PAGER} -N -R -S
 }
 
 ##________________________________________________________________________________
@@ -4969,7 +4984,7 @@ function FUNCTIONS_SH_INIT() {
   if [[ $1 == ";" ]] ; then				# This was NOT called by a script
     CMD_LINE=""						# Initializing a terminal session - CMD_LINE not avaialable
   else							# This was...
-    declare -gx CMD_LINE=$(sed -e 's/^\/bin\/bash./"/' -e 's/\x0/" "/g' -e 's/ "$//' /proc/$$/cmdline)	# The command line (quoted)
+    declare -gx CMD_LINE=$(sed -e 's/^/"/' -e 's/\x0/" "/g' -e 's/ "$//' /proc/$$/cmdline)	# The command line (quoted)
     set +o histexpand					# We don't want history expansion in scripts
   fi
   declare -gx _GET_ARGS_PARSED_HELP_DIR_

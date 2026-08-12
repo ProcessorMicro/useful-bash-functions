@@ -236,6 +236,7 @@ BEGIN {
   PSargsArrayVar = "Args"				# The bash array containing the arguments
 
   # HELP display pager variables
-  HELPless= " |& less -R -S "				# The pager for displaying help
-  HELPcat= ""						# The non-pager for displaying help
+  ## BashPager = X					# The assigned pager
+  HELPless = " |& " BashPager " -R -S "			# The pager for displaying help
+  HELPcat = ""						# The non-pager for displaying help
 }

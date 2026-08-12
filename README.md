@@ -150,7 +150,7 @@ From the command line in your terminal emulator create an empty download directo
 Then change your working directory to it.
 
 ```bash
-mkdir ~/MyDownLoad                   # Or to wherever you want
+mkdir -p ~/MyDownLoad                # Or to wherever you want
 cd ~/MyDownLoad                      # And set your working directory
 ```
 
@@ -205,13 +205,8 @@ The install script should display the following message:
 - Instead, if the first message is an error something like:  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Command not found.**
 
-- or a message something like:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**./install.sh: cannot execute: required file not found.**
-
-- Or an error message
-
 It means the command `bash` is not installed.  
-Install `bash` and re-execute `install.sh`.
+Using your linux distribution process,  install `bash` and re-execute `install.sh`.
 
 #### Step 4
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim:set number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 #
-#	/etc/profile.d/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
+#	FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
 
 SCRIPT_PURPOSE="This script sets global defaults for the GET_ARGS and COLOR functions."
 SCRIPT_VERSION="12.04.02 - Sep 10, 2025"
@@ -42,7 +42,15 @@ declare -x BASH_ENV="${BASH_SOURCE[0]}"
 ## GLOBAL - Global variables that modify the GET_ARGS function defaults
 ##________________________________________________________________________________
 ##
-## 1) _GET_ARGS_GLOBAL_HELP_DEFAULT_ - Set the default help mode <HM>
+## 1) _FUNCTIONS_SH_PAGER_ - Set the default display pager. The default is "less.
+##
+##    export _FUNCTIONS_SH_PAGER_="less"
+
+export FUNCTIONS_SH_PAGER="less"
+
+##________________________________________________________________________________
+##
+## 2) _GET_ARGS_GLOBAL_HELP_DEFAULT_ - Set the default help mode <HM>
 ##    The variable _GET_ARGS_GLOBAL_HELP_DEFAULT_ sets the default <HM> mode
 ##      for all scripts that use GET_ARGS.
 ##    The syntax is:
@@ -62,12 +70,15 @@ declare -x BASH_ENV="${BASH_SOURCE[0]}"
 ##           The default GTAB is 8.
 ##    The <HM> default can be overwritten by the GET_ARGS_DIRECTIVE
 ##    --Default or by using the HELP basic option with an <HM> code.
+##
+##    # Default <HM> is compressed mode
+##    declare -x _GET_ARGS_GLOBAL_HELP_DEFAULT_="c"
 
 declare -x _GET_ARGS_GLOBAL_HELP_DEFAULT_="c"	# Default <HM> is compressed mode
 
 ##________________________________________________________________________________
 ##
-## 2) _GET_ARGS_PARSED_HELP_DIR_ - Set the parsed files location.
+## 3) _GET_ARGS_PARSED_HELP_DIR_ - Set the parsed files location.
 ##    When GET_ARGS parses the GET_ARGS_DIRECTIVES in a parent script, it creates a
 ##    number of files that:
 ##      a) Recreate the gawk parsed variables needed for the parent script
@@ -84,7 +95,7 @@ declare -x _GET_ARGS_GLOBAL_HELP_DEFAULT_="c"	# Default <HM> is compressed mode
 ##
 ##________________________________________________________________________________
 ##
-## 3) _GET_ARGS_DONT_SAVE_ENVIRONMENT_ - Create temporary GET_ARGS parsed files.
+## 4) _GET_ARGS_DONT_SAVE_ENVIRONMENT_ - Create temporary GET_ARGS parsed files.
 ##    To have the files, parsed by GET_ARGS for each parent script, always created
 ##    in a unique temporary directory (that will be deleted when the parent script
 ##    exits), declare the following:
@@ -98,7 +109,7 @@ declare -x _GET_ARGS_GLOBAL_HELP_DEFAULT_="c"	# Default <HM> is compressed mode
 
 ##________________________________________________________________________________
 ##
-## 4) _GET_ARGS_GLOBAL_DIRECTIVES_DEFAULTS_ - Set default GET_ARGS_DIRECTIVES
+## 5) _GET_ARGS_GLOBAL_DIRECTIVES_DEFAULTS_ - Set default GET_ARGS_DIRECTIVES
 ##    Global GET_ARGS_DIRECTIVES are defined with the variable:
 ##      _GET_ARGS_GLOBAL_DIRECTIVES_DEFAULTS_="GAD1 GAD2 ..."
 ##    Each GADi is written as "--KEYWORD [ARG]" in the same way as specifying
@@ -120,9 +131,13 @@ declare -x _GET_ARGS_GLOBAL_HELP_DEFAULT_="c"	# Default <HM> is compressed mode
 ##         the global defaults. It must preceed the call to the GET_ARGS function.
 ##
 ##     unset _GET_ARGS_GLOBAL_DIRECTIVES_DEFAULTS_
+##
 ##________________________________________________________________________________
 ##
-##  5) HelpColors - Set the default help highlight colors
+## COLORS - Global Color and Highlighting Settings
+##________________________________________________________________________________
+##
+## 6) HelpColors - Set the default help highlight colors
 ##    The global colors for GET_ARGS are set in the variables:
 ##      GAsh      # Default SECTION highlight
 ##      GAoh      # Default OPTION highlight
@@ -142,4 +157,33 @@ COLOR_MAKE -F blue -E 1 GAsh      # Default SECTION highlight - BOLD Blue
 COLOR_MAKE -F SkyBlue1 GAoh       # Default OPTION highlight
 GAth="${GAsh}"                    # Default TITLE highlight
 GAah="${GLD}"                     # Default ACTION highlight
+
+##________________________________________________________________________________
+##
+## 7) Default Colors - Set the default highlighting variables.
+##    The following are the default highligting variable names:
+##      RED  PUR  GLD   BLU  GRN  YEL  ORG
+##      PNK  LIM  GREP  UL  BOLD  BLK  WHI
+##    To change them, you need to edit the file:
+##      Either: ~/bin/functions.sh           # For a user install
+##          Or: /usr/local/bin/functions.sh  # For a system install
+##    Locate the line:  functions COLORS_SET() {
+##
+##      After the following lines for "yad", modify the color names for
+##      the _XXX_ variables where XXX is one of the variable names above.
+##        # =============================
+##        # = Colors for "yad ..."      =
+##        # =============================
+##
+##      After the following lines for "echo", modify the color numbers for
+##      the _XXX_ variables where XXX is one of the variable names above.
+##        # =============================
+##        # = Colors for "echo -e ..."  =
+##        # =============================
+##
+##      Color names and numbers can be found in:
+##        Either:
+##          /usr/local/bin/.functions.sh.COLOR_MAKE.ColorTable.txt
+##        Or:
+##          ~/bin/.functions.sh.COLOR_MAKE.ColorTable.txt
 
