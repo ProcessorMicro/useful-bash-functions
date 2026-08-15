@@ -66,6 +66,10 @@ function Install() {
   chmod 755 ${EtcDir}/${ExtraFunctions} ${EtcDir}/${DefaultsFile}
 
   while read -u 3 Script ; do
+    if [[ ${Script} == MKSCRIPT && -f ${BinDir}/${Script} ]] ; then
+      echo -e "\nThe script \"${BinDir}/MKSCRIPT\" exists\n    so it was not overwritten.\nManually merge the install file with your existing one.\nThe install version is in \"${WhereAmI}/MKSCRIPT\"."
+      continue
+    fi
     cp -f "${Script}" "${BinDir}" || ERROR "Copy of script \"${Script}\" failed."
     (( $# )) && chown root:root "${BinDir}/${Script}"
     chmod 755 "${BinDir}/${Script}"
