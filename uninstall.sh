@@ -67,7 +67,7 @@ function Install() {
 
   while read -u 3 Script ; do
     if [[ ${Script} == MKSCRIPT && -f ${BinDir}/${Script} ]] ; then
-      echo -e "\nThe script \"${BinDir}/MKSCRIPT\" exists\n    so it was not overwritten.\nManually merge the install file with your existing one.\nThe install version is in \"${WhereAmI}/MKSCRIPT\"."
+      echo -e "\nThe script \"${BinDir}/${Script}\" exists\n    so it was not overwritten.\nManually merge the install file with your existing one.\nThe install version is in \"${WhereAmI}/${Script}\"."
       continue
     fi
     cp -f "${Script}" "${BinDir}" || ERROR "Copy of script \"${Script}\" failed."
