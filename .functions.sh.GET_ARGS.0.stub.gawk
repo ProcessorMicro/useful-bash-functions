@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.0.globals.gawk
 #
 # PURPOSE = "This gawk script identifies/defines some of the global variables."
-# VERSION = "14.01.06 - Jul 01, 2026"
+# VERSION = "14.01.07 - Aug 30, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -178,6 +178,7 @@ BEGIN {
   GAisMax = 2						# For Grp 2: --Args_Max or --Opts_Max
   GAisMin = 3						# For Grp 2: --Args_Min or --Opts_Min
   GAisList = 7						# For Grp 2: --Args_List
+  GAisTitlePara = 5					# For Grp 5: --Title and --Para
   GAisTitle = 0						# For Grp 5 Typ 0: --Title
   GAisPreScan = 9					# For GRP 9
   GAbigNum = 1024^4					# Hopefully more than the number or arguments ever encounteres

@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.5.help.gawk
 #
 # PURPOSE = "This script implements GET_ARGS help functionality."
-# VERSION = "14.01.06 - Jul 01, 2026"
+# VERSION = "14.01.07 - Aug 30, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -122,9 +122,14 @@ function helpSectionInsertDoIt(helpType,briefHelp,	filterPfx,headerFilterPfx,hel
     if ( HELPbriefHelpSections !~ idxS ) return		# Do nothing if brief help and not a brief help section
     gsub( HELPnoTabNL, " ", HELPsectionText )		# For brief help no <TAB> or <NL>
     if ( GAinst[Grp] == GAopt_dGrp ) {			# --Opt_D
-      helpNL = HELPcolumnSep }				# For --Opt_D, --Act_D, --Hid_D change <NL> to a column separator
-    if ( GAinst[Grp] == GAdes_dGrp ) {			# --Des_D
-      helpNL = HELPnl }					# Set the <NL> to use if not --Opt_D ...
+      helpNL = HELPcolumnSep				# For --Opt_D, --Act_D, --Hid_D change <NL> to a column separator
+    } else if ( GAinst[Grp] == GAdes_dGrp ) {		# --Des_D
+      helpNL = HELPnl					# Set the <NL> to use if not --Opt_D ...
+    } else if ( GAinst[Grp] == GAisTitlePara ) {
+      helpNL = HELPnl					# Set the <NL> to use for --Title and --Para
+      if ( GAinst[Typ] != GAisTitle ) {			# --Para
+        HELPsectionText = HELPcolumnSep HELPsectionText }	# So move the para text to column 2
+    }
     leadingNL = "" }					# No leading <NL>
   else helpNL = HELPnl
   if ( GAinst[My] ) idxH = GAinst[My]			# The header ix in the "my" section
@@ -140,7 +145,7 @@ function helpSectionInsertDoIt(helpType,briefHelp,	filterPfx,headerFilterPfx,hel
       else filterPfx = HELPsepFC GAOptFCs HELPsepFC	# Set filter prefix to the GAOpt one
       headerFilterPfx = HELPsepFC HELPsepFC		# <FC>s to be filled in later
     }
-  } else {
+  } else {						# "Non-briep" help
     filterPfx = HELPsepFC _a_ HELPsepFC			# Always "all"
     headerFilterPfx = filterPfx
   }
