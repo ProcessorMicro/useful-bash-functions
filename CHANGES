@@ -1,5 +1,5 @@
 2026.08.30
-Fixed brief help to correctly manage --Title and --Para directives.
+Fixed GET_ARGS brief help to correctly manage --Title and --Para directives.
 
 2026.08.15
 Change to install.sh to not overwrite MKSCRIPT if it exists.
