@@ -5,7 +5,7 @@
 #
 # PURPOSE = "These functions do a pre-scan of the GET_ARGS_OPTS to locate GAOpts that will influence
 #            the information collected during the GAOpts "full" scan and the parent script options scan."
-# VERSION = "14.01.06 - Jul 01, 2026"
+# VERSION = "14.01.07 - Aug 30, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -270,42 +270,50 @@ function preParseHeading(	cmd,head,lenFixed,result,seps) {
 }
 
 # Change any basic option <OLDCODE> to <NEWCODE>
-function preParseNewBasicOption(	abceFCandHM,newOpt,newOptMsg,newOptOrig,oldOpt,oldOptOrig,pos) {
+function preParseNewBasicOption(	abceFCandHM,gaoptaarg,newOpt,newOptMsg,newOptOrig,oldOpt,oldOptOrig,pos) {
   preGetNextArg()					# Get the next argument
   switch ( GAOptArg ) {
-    case "-D":						# Delete this BASEOPT
-      preGetNextArg()					# Get the next arg
+    case "-R":
+      preGetNextArg()
+      if ( GAOptArg !~ /^[ahtv]/ ) {
+        preError( "For GET_ARGS_DIRECTIVE \"" GAOpt " -R " GAOptArg "\": Invalid BASEOPTSECTION \"" GAOptArg "\"." )
+      }
+      gaoptarg = ";" GAOptArg				# Flag as base option section remove
+    case /-D|-R/:					# Delete this BASEOPT or section
+      if ( ! gaoptarg ) {
+        preGetNextArg()					# Get the next arg
+        gaoptarg = ":" GAOptArg }
       GAbasicOptsCnt--					# Decrement the count of "basic option" options
-      switch ( GAOptArg ) {				# Delete this basic option so mark it as "empty"
-        case "h":
+      switch ( gaoptarg ) {				# Delete this basic option so mark it as "empty"
+        case /:h|;h|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"-" _h_ "\" deleted"
           _h_       = GAhideEQ
-          break
-        case "H":
+          if ( gaoptarg ~ /:/ ) break
+        case /:H|;h|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"-" _H_ "\" deleted"
           _H_       = GAhideEQ
-          break
-        case "help":
+          if ( gaoptarg ~ /:/ ) break
+        case /:help|;h|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"--" _help_ "\" deleted"
           _help_    = GAhideEQ
-          break
-        case "HELP":
+          if ( gaoptarg ~ /:/ ) break
+        case /:HELP|;h|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"--" _HELP_ "\" deleted"
           _HELP_    = GAhideEQ
-          break
-        case "t":
+          if ( gaoptarg ~ /:/ ) break
+        case /:t|;t|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"-" _t_ "\" deleted"
           _t_       = GAhideEQ
-          break
-        case "test":
+          if ( gaoptarg ~ /:/ ) break
+        case /:test|;t|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"--" _test_ "\" deleted"
           _test_    = GAhideEQ
-          break
-        case "v":
+          if ( gaoptarg ~ /:/ ) break
+        case /:v|;v|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"-" _v_ "\" deleted"
           _v_       = GAhideEQ
-          break
-        case "version":
+          if ( gaoptarg ~ /:/ ) break
+        case /:version|;v|;a/:
           PREtmpMessage = PREtmpMessage HELPnl "# Basic Option \"--" _version_ "\" deleted"
           _version_ = GAhideEQ
           break

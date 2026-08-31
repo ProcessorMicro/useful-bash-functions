@@ -2,7 +2,7 @@
 # vim: set nomodified number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
 SCRIPT_PURPOSE_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
-COMMON_FUNCTIONS_VERSION="14.01.09 - Aug 08, 2026"
+COMMON_FUNCTIONS_VERSION="14.01.10 - Aug 30, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -2844,10 +2844,11 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##       The three mnemonics for <HM> (b, c and e) can be changed with --Base_O.
 ##
 ##   MODIFYING A BASIC OPTION
-##       --Bas[ic]_O[ption] BASEOPT=NEWOPT
-##       --Bas[ic]_O[ption] -D BASEOPT
-##       --Bas[ic]_O[ption] ALLOPT=NEWALLOPT[@ALLMSG]
-##       --Bas[ic]_O[ption] MODOPT=NEWMODOPT[@MODMSG]
+##       --Bas[ic]_O[ption] BASEOPT=NEWOPT            # Redefine a basic option
+##       --Bas[ic]_O[ption] -D BASEOPT                # Delete a basic option
+##       --Bas[ic]_O[ption] -R BASEOPTSECTION         # Remove a basic option section
+##       --Bas[ic]_O[ption] ALLOPT=NEWALLOPT[@ALLMSG] # Redefine the "all" filter code
+##       --Bas[ic]_O[ption] MODOPT=NEWMODOPT[@MODMSG] # Redefine the help modifier
 ##     This GET_ARGS_DIRECTIVE is used to redefine a default basic option so
 ##       the default basic option can be used as a regular option and NEWOPT
 ##       is used for the basic option.
@@ -2861,6 +2862,13 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##       redefining it) so it can used as a regular option. Note: If both the
 ##       short and the long BASEOPT are redefined (e.g. "v" and "version")
 ##       then that default basic option is not available to the parent script.
+##     Use of "-R BASEOPTSECTION" removes one or more of the generated basic
+#        option sections: HELP (-h ...), TEST (-t ...), or VERSION (-v ...).
+##         BASEOPTSECTION can be one of the following codes:
+##           "a" Remove all the basic option sections.
+##           "h" Remove the basic option HELP section.
+##           "t" Remove the basic option TEST section.
+##           "v" Remove the basic option VERSION section.
 ##     ALLOPT Can be "a" or "all" which redefines the default <FilterFC>
 ##       of "a" used to display all (filtered and un-filtered) HELP lines.
 ##     ALLMSG If used, replaces the default filter "all" message of:
