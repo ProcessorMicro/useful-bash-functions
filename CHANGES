@@ -1,7 +1,8 @@
-2026.08.30
+2026.08.31
 Fixed GET_ARGS brief help to correctly manage --Title and --Para directives.
 Added GET_ARGS directive "--Bas_O -R ..." to enable removal of one or all of the
   generated basic option sections: HELP, TEST, VERSION.
+Minor GET_ARGS display improvements.
 
 2026.08.15
 Change to install.sh to not overwrite MKSCRIPT if it exists.

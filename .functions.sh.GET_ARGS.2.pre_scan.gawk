@@ -5,7 +5,7 @@
 #
 # PURPOSE = "These functions do a pre-scan of the GET_ARGS_OPTS to locate GAOpts that will influence
 #            the information collected during the GAOpts "full" scan and the parent script options scan."
-# VERSION = "14.01.07 - Aug 30, 2026"
+# VERSION = "14.01.07 - Aug 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -279,6 +279,7 @@ function preParseNewBasicOption(	abceFCandHM,gaoptaarg,newOpt,newOptMsg,newOptOr
         preError( "For GET_ARGS_DIRECTIVE \"" GAOpt " -R " GAOptArg "\": Invalid BASEOPTSECTION \"" GAOptArg "\"." )
       }
       gaoptarg = ";" GAOptArg				# Flag as base option section remove
+      if ( GAOptArg ~ /[ah]/ ) PShelpNoSuggestion = 1	# No "Try..." message if no help
     case /-D|-R/:					# Delete this BASEOPT or section
       if ( ! gaoptarg ) {
         preGetNextArg()					# Get the next arg

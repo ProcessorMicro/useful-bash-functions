@@ -2,7 +2,7 @@
 # vim: set nomodified number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
 SCRIPT_PURPOSE_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
-COMMON_FUNCTIONS_VERSION="14.01.10 - Aug 30, 2026"
+COMMON_FUNCTIONS_VERSION="14.01.10 - Aug 31, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #

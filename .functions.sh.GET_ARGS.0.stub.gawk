@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.0.globals.gawk
 #
 # PURPOSE = "This gawk script identifies/defines some of the global variables."
-# VERSION = "14.01.07 - Aug 30, 2026"
+# VERSION = "14.01.07 - Aug 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -67,7 +67,8 @@ BEGIN {
   GAinvalidOPTiChars = @/^-|^[:?]$|\s+/			# Characters not allowed in any OPTi
   GAinvalidOPTiCharsMess = " cannot start with \"-\", or contain whitespace, \":\" or \"?\"."	# Message for characters not allowed in any OPTi
   # GAdefinedOPTi[*] = X				# An array of all defined options
-  # GAOptValueNeeded[*] = X				# An array of all defined options that need a value
+  GAOptValueNeeded[1] = 1				# An array of all defined options that need a value
+  delete GAOptValueNeeded[1]				# Delete it but ie is now an array
   # GAsavedOPTLIST[*] = X				# The array or all defined OPTLIST
   GAOptsMulti[""] = 1					# Array of GAOpts that can be used more than once (indexed by OPT1, value=1)
   GAactionKeys = " "					# A space separated list of valid ACTION keys

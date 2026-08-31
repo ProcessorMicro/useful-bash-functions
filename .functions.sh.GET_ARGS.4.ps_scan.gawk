@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.4.ps_scan.gawk
 #
 # PURPOSE = "These functions analyze the parent script args when it is invoked."
-# VERSION = "14.01.06 - Jul 01, 2026"
+# VERSION = "14.01.07 - Aug 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -44,6 +44,7 @@ BEGIN {
   PSforceExit = 8					# Used to signal "help" or "version" requested
   PSuserError = 1					# The execution of the parent script has option/argument errors
   # PShelpSuggestion = X				# Contains the "Try; ..." help message
+  # PShelpNoSuggestion = X				# If true, the suggestion is not made
   # HELPfilterCode = X					# The <FC> for help
   # HELPmodifier = X					# The <HM> specified by the parent script -h<HM> or -h<FC>[<HM>]
   # HELPisHelp = X					# True if help requested
@@ -95,6 +96,7 @@ function psGetOptsAndArgs(shortOpts,longOpts,optsNargs,parsed,	cmd,errorMsg,line
   cmd = "getopt --name "BashCmd " --options='" shortOpts "' --longoptions='" longOpts "' -- " optsNargs " 2>&1 ; echo \"ReturnCode: $?\""
   while ( cmd | getline line ) {			# Execute the getopt command
     if ( line ~ "^" BashCmd ": " || line ~ /^getopt: / ) {	# If there was a getopt error
+      if ( line ~ / -- / ) sub( / -- /, ": -", line )
       if ( errorMsg ) errorMsg = errorMsg "\n" line
       else errorMsg = line
     } else {
@@ -179,6 +181,7 @@ function psIsPStestOrVersion() {			# See if "test" or "version" is detected.
 }
 
 function psMakeHelpSuggestion(	fc) {
+  if ( PShelpNoSuggestion ) return			# No help - no suggestion
   if ( GAdefinedFCs ) fc = "<FC>"
   PShelpSuggestion = "\001\n" BashErrorTry BashCmd " <H>\t  # Where: <H> is one of:"
   if ( _h_ != GAhideEQ ) PShelpSuggestion = PShelpSuggestion " -" _h_ fc
