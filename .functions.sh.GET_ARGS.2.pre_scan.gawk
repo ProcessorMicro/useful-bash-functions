@@ -47,7 +47,8 @@ function preScanGAOpts(		basicOptionError) {
   preGAOptSearch( "--Bas" )				# Locate changes to BASIC OPTION options AND record
   HELPcodesFCandHM = _a_ _b_ _c_ _e_
   HELPhelpOptions = " " _h_ " " _help_ " " _hInt_ " " _H_ " " _HELP_ " " _HInt_ " "
-  HELPtestNversionOptions = " " _t_ " " _test_ " " _tInt_ " " _v_ " " _version_ " " _vInt_ " "
+  HELPtestOptions = " " _t_ " " _test_ " " _tInt_ " "
+  HELPversionOptions = " " _v_ " " _version_ " " _vInt_ " "
   preMergeDebugMessage( "Basic Option Modifications" )				# Merge messages
 
   preGAOptSearch( "--Sec" )				# Locate changes to section headings

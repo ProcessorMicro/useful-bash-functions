@@ -126,7 +126,7 @@ END {							# Return the result
 # =================^ Main Process ^==================== #
 
 function mainError(message,errorCode) {			# Display the error message and exit
-  gsub( "[^\001]\\n", "\n" GAerrorPrefix, message )	# Indent any additional (un-marked) line feeds
+  message = gensub( "([^\001])\\n", "\\1\n" GAerrorPrefix, "G", message )	# Indent any additional (un-marked) line feeds
   gsub( "\001", "", message )				# Remove all marks
   printf( "%s%s\n", BashErrorPfx, message ) > "/dev/stderr"
   MainErrorCode = errorCode

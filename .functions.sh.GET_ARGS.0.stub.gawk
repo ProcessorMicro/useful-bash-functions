@@ -44,6 +44,7 @@ BEGIN {
  ## GAth	 					# BASH VAR - The ANSII code for TITLE lines
 
   Bash_ALL_OPTIONS_ = " "				# A list of all options defined (no "-"). Becomes _ALL_OPTIONS_ for IS_EXCLUSIVE
+  # Bash_TEST_OPTIONS_ = X				# Just the "test" options. Becomes _TEST_OPTIONS_ for IS_EXCLUSIVE
 
   # The following are used to manage parsing of the GET_ARGS_DIRECTIVES (GAOpt).
   # GAOptsAndArgsCount = 0				# The number of elements in GAOpts

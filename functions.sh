@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 # vim: set nomodified number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
-SCRIPT_PURPOSE_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
-COMMON_FUNCTIONS_VERSION="14.01.10 - Aug 31, 2026"
+SCRIPT_PURPOSE_COMMON_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
+SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.01.10 - Aug 31, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -103,7 +103,7 @@ FUNCTIONS_SH_PAGER="${FUNCTIONS_SH_PAGER:=less}"	# Ensure a pager command is set
 function DO_HELP() {
   local _FUNCTIONS_SH_="${FUNCTIONS_SH_DIR}/${FUNCTIONS_SH_NAME}"
   if [[ $1 == -v ]] ; then
-    echo -e "Purpose: ${SCRIPT_PURPOSE_FUNCTIONS_SH}\nVersion: ${COMMON_FUNCTIONS_VERSION}"
+    echo -e "Purpose: ${SCRIPT_PURPOSE_COMMON_FUNCTIONS_SH}\nVersion: ${SCRIPT_VERSION_COMMON_FUNCTIONS_SH}"
   elif (( $# )) ; then
     FIND-FUNCTIONS -l -c -s "${_FUNCTIONS_SH_}" "$@"
   else
@@ -285,7 +285,7 @@ function DO_HELP() {
 ##   CMD_DIR            The containing directory of the parent script.
 ##   CMD_LINE           The command line (as typed and re-quoted) that invoked
 ##                      the script.
-##   ERROR_PREFIX_SPACES
+##   ERROR_PREFIX_INDENT
 ##                      A number of spaces equal to the ERROR prefix length.
 ##                      Use it to pretty up multi-line error messages.
 ##   _ERROR_MESSAGE_    If an error occurs, contains the error message even
@@ -341,6 +341,9 @@ function DO_HELP() {
 ##   _TESTING_          Indicates if TESTing is set or not.
 ##   _TMP_NAMES_ARRAY   _ Variable set internally. An associative array of
 ##                      the TMP files created by TMP_FILE_CREATE.
+##   WARNING_PREFIX_INDENT
+##                      A number of spaces equal to the WARNING prefix length.
+##                      Use it to pretty up multi-line waning messages.
 ##________________________________________________________________________________
 ##
 ## The function FUNCTIONS_SH_INIT (at the end) executes commands and functions
@@ -355,10 +358,6 @@ function DO_HELP() {
 ##  #   (local) DNS.                                                            #
 ##  #############################################################################
 ##
-declare -gx LOCAL_PCS=${LOCAL_PCS:=LOCAL_PC_NAMES_UNDEFINED} # List of local PCs to be accessed
-
-[[ -n $BASH_VERSION ]] && shopt -s extglob		# Turn on extended pattern expansion
-_ERROR_MESSAGE_="" _LOCAL_USAGE_="" _USAGE_OPTIONS_=""
 
 ##________________________________________________________________________________
 ##
@@ -569,16 +568,11 @@ _ERROR_MESSAGE_="" _LOCAL_USAGE_="" _USAGE_OPTIONS_=""
 ##       -V VARIABLE
 ##          Is the name of a variable that contains the result. The default
 ##            VARIABLE name is 'ANSWER'.
+##          Option -M creates an array VARIABLE[x].
 ##          VARIABLE may be referenced as ${VARIABLE} or ${VARIABLE[x]} where
-##            x = 0 to the number of VARIABLE elements minus one.
-##          For option -M, VARIABLE_IDX[x] and VARIABLE_VAL[x] is also created.
+##            x = 0 to the number of answers minus one.
 ##          If the expected result is numeric a numeric comparison with CHOICES
 ##            is made. However leading zeros are NOT removed in the result.
-##          Note: The suffix "_VAL" is created by the ASK functions while the
-##            GET_ARGS functions use a suffix of _Val. This somewhat confusing
-##            and seemingly inappropriate difference was purposely done to make
-##            it extremly unlikely both functions would generate the same
-##            variable name.
 ##       -- Indicates the end of options. The remaining arguments comprise
 ##          the QUESTION. This is needed only if QUESTION begins with a "-".
 ##     RANGELISTS
@@ -725,7 +719,7 @@ function _ASK_DOIT_() {
     [[ $1 =~ ^--. ]] && _DLR1_="${1:1}" || _DLR1_="$1"	# Convert "--OP" into "-OP" but leave "--" as is
     case "${_DLR1_}" in
       "") (( $# > 0 )) && { shift 1 ; continue ; } || break ;;
-      -C)	#|--choices
+      -C)	# |--choices
           (( ${#2} == 0 )) && ERROR "${_FUNCTION_}: For option \"-C CHOICES\", invalid CHOICES \"${2}\"."
           _CHOICES_ORIG_="$2"				# Remember the original CHOICES
           _IS_CHOICES_="1"
@@ -734,31 +728,31 @@ function _ASK_DOIT_() {
             _PROMPT_SUPPRESS_HELP_="1"
           fi
           shift 1 ;;
-      -CA)	#|--as-is				# Choices as-is (without normalization)
+      -CA)	# |--as-is				# Choices as-is (without normalization)
           _AS_IS_="1" ;;
-      -CD)	#|--choices-display
+      -CD)	# |--choices-display
           _DISPLAY_CHOICES_="$2"
           _IS_DISPLAY_CHOICES_="1"
           shift 1 ;;
-      -CC*)	#|--choices-compressed
+      -CC*)	# |--choices-compressed
           _PROMPT_COMPRESSED_="1"
           ;&						# Carry on to the next "case"
-      -CW*)	#|--choices-wrapped
+      -CW*)	# |--choices-wrapped
           _WRAP_CHOICES_="1"
           [[ ${1} =~ = ]] && _WRAP_LENGTH_="${1#*=}"
           ;;
-      -D)	#|--default)
+      -D)	# |--default)
           (( ${#2} == 0 )) && ERROR "${_FUNCTION_}: For option \"-D DEFAULT\", empty or missing DEFAULT \"${2}\"."
           _DEFAULT_ANSWER_="$2"				# The default answer if "OK" or "<Enter>"
           _IS_DEFAULT_ANSWER_="1"
           shift 1 ;;
-      -ER)	#|--empty-allowed
+      -ER)	# |--empty-allowed
           _EMPTY_RESPONSE_="1"				# An empty response is allowed
           ;;
-      -F)	#|--font
+      -F)	# |--font
           _FONT_="$2"
           shift 1 ;;
-      -FS)	#|--font-size
+      -FS)	# |--font-size
           if IS_NUMERIC "$2" ; then
             _FONT_SIZE_="${2}pt"
           else
@@ -766,56 +760,56 @@ function _ASK_DOIT_() {
             _FONT_SIZE_="$2"
           fi
           shift 1 ;;
-      -FW)	#|--font-weight
+      -FW)	# |--font-weight
           [[ ${_FONT_WEIGHTS_} =~ \ $2\  ]] || ERROR "${_FUNCTION_}: For option -FW, invalid font weight \"${2}\"."
           _FONT_WEIGHT_="$2"
           shift 1 ;;
-      -FY)	#|--font-style
+      -FY)	# |--font-style
           [[ ${_FONT_STYLES_} =~ \ $2\  ]] || ERROR "${_FUNCTION_}: For option -FY, invalid or missing font style \"${2}\"."
           _FONT_STYLE_="$2"
           shift 1 ;;
-      -G)	#|--gui					# The GUI version
+      -G)	# |--gui					# The GUI version
           if [[ ! ${_FUNCTION_} =~ _GUI ]] ; then
             _FUNCTION_="${_FUNCTION_}_GUI"
             _FUNCTION_SPACES_="${_FUNCTION_SPACES_}    "
           fi
           _ASK_WITH_GUI_="1" ;;
-      -H)	#|--header
+      -H)	# |--header
           _PROMPT_HEADER_="$2\n"			# The header to display
           shift 1 ;;
-      -H1)	#|--help1
+      -H1)	# |--help1
           _HELP1_="$2"					# Replace the HELP1 section of PROMPT
           _IS_HELP1_="1"
           shift 1 ;;
-      -H2)	#|--help2
+      -H2)	# |--help2
           _HELP2_="$2"					# Replace the HELP2 section of PROMPT
           _IS_HELP2_="1"
           shift 1 ;;
-      -L)	#|--legend
+      -L)	# |--legend
           _PROMPT_LEGEND_="Legend: $2\n"		# Explains the meaning of the choices
           shift 1 ;;
-      -MD*)	#|--minimal-display
+      -MD*)	# |--minimal-display
           _PROMPT_MINIMAL_="1"
           [[ ${1} =~ = ]] && _PROMPT_SUPPRESS_HELP1_="1"
           ;;
       -M=)
           _PROMPT_SHORTCUT_="${1#*=}"
           ;&
-      -M)	#|--multiple-choices
+      -M)	# |--multiple-choices
           _IS_MULTI_CHOICES_="1"
           _PROMPT_MORE_=" or more"
           _PROMPT_PLURAL_="s" ;;
-      -P) 	#|--password mode
+      -P) 	# |--password mode
           _PASSWORD_="-s" ;;
-      -Q)	#|--quitcode
+      -Q)	# |--quitcode
           _QUIT_CODE_="$2"
           shift 1 ;;
-      -R)	#|--return
+      -R)	# |--return
           _ASK_RETURN_="1" ;;
       -U) [[ $2 =~ ^[3-9]$ ]] || ERROR "${_FUNCTION_}: For option -U, invalid or missing file descriptor \"$2\"."
           _FILE_DESC_="$2"
           shift 1 ;;
-      -V)	#|--variable
+      -V)	# |--variable
           _ANSWER_VARIABLE_="$2"			# The variable that will contain the response
           [[ ${_ANSWER_VARIABLE_} == ANSWER ]] && unset ANSWER || local ANSWER=""
           shift 1 ;;
@@ -1013,7 +1007,7 @@ function _ASK_DOIT_() {
           _ANSWER_ORIG_="$( yad --fixed --center --nowrap --entry ${_PASSWORD_} --entry-text="${_DEFAULT_ANSWER_}" \
             ${_BUTTONS_} --buttons-layout=center --title "${_PROMPT_TITLE_}" \
             --text '<span font="'"${_FONT_}"'" style="'${_FONT_STYLE_}'" size="'${_FONT_SIZE_}'" weight="'${_FONT_WEIGHT_}'">'"$( _ASK_PROMPT_TEXT_ )"'</span>' \
-            | sed -e 's/[$"`\\]/\\&/g')"
+            || sed -e 's/[$"`\\]/\\&/g')"
           _IS_ERROR_="$?"
           set +o pipefail
           case ${_IS_ERROR_} in
@@ -1588,6 +1582,11 @@ _GAWK_NORMALIZE_="${FUNCTIONS_SH_DIR}/.${FUNCTIONS_SH_BASENAME}.ASK_Normalize_Ra
 ##         VARIABLE_VAL[i]: The actual menu item text. I.E. The value of
 ##                          ${ARRAYNAME[${VARIABLE_IDX[i]}]} or
 ##                          ${ARGS[${VARIABLE_IDX[i]}]}
+##     Note: The suffix "_VAL" is created by the this function while the
+##       GET_ARGS function uses a suffix of _Val. This somewhat confusing
+##       and seemingly inappropriate difference was purposely done to make
+##       it extremly unlikely both functions would generate the same
+##       variable name.
 function ASK_WITH_MENU() {
   _FUNCTION_="ASK_WITH_MENU"
   _FUNCTION_SPACES_="               "
@@ -1623,67 +1622,67 @@ function _ASK_WITH_MENU_DOIT_() {
   while true ; do
     [[ $1 =~ ^--. ]] && _dlr1_="${1:1}" || _dlr1_="$1"
     case "${_dlr1_}" in
-      -CA)	#|--as-is				# Choices as-is (without normalization)
+      -CA)	# |--as-is				# Choices as-is (without normalization)
           _ASK_OPTIONS_+=( $1 ) ;;
-      -D)	#|--default)
+      -D)	# |--default)
           _DEFAULT_="$2"				# The default answer if "OK" or "<ENTER>"
           shift 1 ;;
-      -EE)	#|--enhance-selectors
+      -EE)	# |--enhance-selectors
           _ELEMENT_PRE_="${2%:*}"
           [[ ${2} =~ : ]] &&_ELEMENT_POST_="${2#*:}"
           shift 1 ;;
-      -ER)	#|--empty-response
+      -ER)	# |--empty-response
           _ASK_OPTIONS_+=( $1 )				# An empty response is allowed
           ;;
-      -ES)	#|--enhance-selectors
+      -ES)	# |--enhance-selectors
           _SELECTOR_PRE_="${2%:*}"
           [[ ${2} =~ : ]] &&_SELECTOR_POST_="${2#*:}"
           shift 1 ;;
-      -EV)	#|--empty-array
+      -EV)	# |--empty-array
           unset _IGNORE_EMPTY_VALUES_			# Empty menu items are alloewd
           ;;
-      -F) 	#|--font
+      -F) 	# |--font
           _ASK_OPTIONS_+=( $1 "$2" )
           shift 1 ;;
-      -FS) 	#|--font-size
+      -FS) 	# |--font-size
           _ASK_OPTIONS_+=( $1 "$2" )
           shift 1 ;;
-      -FW) 	#|--font-weight
+      -FW) 	# |--font-weight
           _ASK_OPTIONS_+=( $1 "$2" )
           shift 1 ;;
-      -FY) 	#|--font-style
+      -FY) 	# |--font-style
           _ASK_OPTIONS_+=( $1 "$2" )
           shift 1 ;;
-      -G)	#|--gui)				# The GUI version
+      -G)	# |--gui)				# The GUI version
           if [[ ! ${_FUNCTION_} =~ _GUI ]] ; then
             _FUNCTION_="${_FUNCTION_}_GUI"
             _FUNCTION_SPACES_="${_FUNCTION_SPACES_}    "
           fi
           _ASK_OPTIONS_+=( $1 ) ;;
-      -H1)	#|--help1
+      -H1)	# |--help1
           _ASK_OPTIONS_+=( $1 "$2" )			# Replace the HELP1 section of PROMPT
           shift 1 ;;
-      -H2)	#|--help2
+      -H2)	# |--help2
           _ASK_OPTIONS_+=( $1 "$2" )			# Replace the HELP2 section of PROMPT
           shift 1 ;;
-      -H)	#|--header)				# A menu header is requested.
+      -H)	# |--header)				# A menu header is requested.
           _HEADER_="${2}"
           shift 1 ;;
-      -I*)	#|--use-index
+      -I*)	# |--use-index
           _USE_INDEX_="1"
           [[ ${1} =~ = ]] && _SELECTOR_LEN_="${1/-I=/}"
           _MENU_TYPE_="-e" ;;
-      -L)	#|--legend
+      -L)	# |--legend
           _LEGEND_="${2}"
           shift 1 ;;
-      -MD*)	#|--minimal-display
+      -MD*)	# |--minimal-display
           _ASK_OPTIONS_+=( $1 ) ;;
-      -MI)	#|--menu-instructions
+      -MI)	# |--menu-instructions
           _THE_MENU_[0]="$2"
           shift 1 ;;
-      -MMC)	#| --multiple-menu-choices
+      -MMC)	# | --multiple-menu-choices
           _ONLY_MM_CHOICES_="1" ;;
-      -MML)	#| --multi-menu-lines
+      -MML)	# | --multi-menu-lines
           _SPLIT_="${2%:*}"
           if [[ -n ${_SPLIT_} ]] ; then
             _LINES_="${_SPLIT_}"
@@ -1694,7 +1693,7 @@ function _ASK_WITH_MENU_DOIT_() {
             [[ -n ${_SPLIT_} ]] && _PERCENT_="${_SPLIT_}"
           fi
           shift 1 ;;
-      -MM*)	#| --multiple-menus
+      -MM*)	# | --multiple-menus
           local _mm_="$1"
           if [[ ${_mm_} =~ : ]] ; then			# If there is a ":"
             ASK_WITH_MENU_NUMBER="${_mm_#*:}"		# Set the starting sub-menu number
@@ -1705,23 +1704,23 @@ function _ASK_WITH_MENU_DOIT_() {
           fi
           [[ -z ${_MULTI_MENUS_} ]] && _MULTI_MENUS_="-1"
           ;;
-      -M*)	#|--multiple-choices)
+      -M*)	# |--multiple-choices)
           _ASK_OPTIONS_+=( $1 ) ;;
-      -P) 	#|--password mode
+      -P) 	# |--password mode
           _ASK_OPTIONS_+=( $1 ) ;;
-      -Q)	#|--quitcode
+      -Q)	# |--quitcode
           _ASK_OPTIONS_+=( $1 "$2" )
           shift 1 ;;
-      -R)	#|--return
+      -R)	# |--return
           __ASK_RETURN__="1"
           _ASK_OPTIONS_+=( $1 ) ;;
-      -S*)	#|--selectorsort)
+      -S*)	# |--selectorsort)
           _IS_SORT_="1"
           [[ $1 =~ = ]] && _SELECTOR_SORT_OPT_+=( "${1/-S=/}" ) ;;
       -U) [[ $2 =~ ^[3-9]$ ]] || ERROR "${_FUNCTION_}: Invalid file descriptor \"-U $2\"."
           _ASK_OPTIONS_+="-U $2 "
           shift 1 ;;
-      -V)	#|--variable)				# The variable that will contain the response
+      -V)	# |--variable)				# The variable that will contain the response
           _MENU_ANSWER_VARIABLE_="$2"
           shift 1 ;;
       --) shift 1 ; break ;;				# '--' indicates the end of options
@@ -3281,8 +3280,8 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##         E.G.   --Var ",,,Alternates"
 ##       Resssigns the array name "All_Opts" to be "Alternates".
 ##         The other names are unchanged.
-##        Note: The suffix "_VAL" is created by the ASK functions while the
-##          GET_ARGS functions use a suffix of _Val. This somewhat confusing
+##        Note: The suffix "_VAL" is created by the ASK_WITH_MENU function while
+##          the GET_ARGS function use a suffix of _Val. This somewhat confusing
 ##          and seemingly inappropriate difference was purposely done to make
 ##          it extremly unlikely both functions would generate the same
 ##          variable name.
@@ -3399,6 +3398,12 @@ function GET_ARGS_DEFAULT() {
   local _GAWK_MAIN_="-f .functions.sh.GET_ARGS.1.main.gawk${FUNCTIONS_SH_SUFFIX}"
   local _GAWK_STUB_="-i .functions.sh.GET_ARGS.0.stub.gawk${FUNCTIONS_SH_SUFFIX}"
 
+  # The pathname ${_GET_ARGS_PARSED_HELP_DIR_} may not be writable if this process was created
+  # by "su <USERID>" rather than "su -l <USERID>". So force use of a temporary one
+  if [[ ! -w ${_GET_ARGS_PARSED_HELP_DIR_} ]] ; then
+    WARNING "For user \"$(id -u -n)\", no write permission on directory:\n    _GET_ARGS_PARSED_HELP_DIR_=\"${_GET_ARGS_PARSED_HELP_DIR_}\".\nForcing use of a temporary directory."
+    _GET_ARGS_DONT_SAVE_ENVIRONMENT_="1"
+  fi
   if (( _GET_ARGS_DONT_SAVE_ENVIRONMENT_ )) ; then
     TMP_DIR_CREATE GET_ARGS_DIR
     local _SAVE_DIR_="${GET_ARGS_DIR}"			# An empty dir for files that will disappear on exit
@@ -3733,9 +3738,10 @@ function GET_ALL_UNIQUE_NFS_DOMAINS_IN_FSTAB() {
 ##       --Only_One  Check if only one (or none) of the Opt_i has been
 ##                   specified.
 ##       --Just_One  Check if just one (or none) of the Opt_i has been
-##                   specified. No other options are allowed.
+##                   specified. No other options are allowed other than the
+##                   "test" options.
 ##                   Note: all "IS_EXCLUSIVE --Just_One ..." function calls
-##                   must precede any "IS_EXCLUSIVE --Default ..." call..
+##                   must precede any --Default or --Assume calls.
 ##       --Default   Set Opt_1 as the default if  none of Opt_1, Opt_2,
 ##                   Opt_3 ... has been specified.
 ##       --Assume    If Opt_1 is used, also set Opt_2, Opt_3, ...
@@ -3768,8 +3774,8 @@ function GET_ALL_UNIQUE_NFS_DOMAINS_IN_FSTAB() {
 ##      If a is used, automatically set any of Opt_b=1, Opt_c=1 or Opt_d=1 that
 ##      is not set and updates variable "Opts_All".
 ##    IS_EXCLUSIVE --Just_One q V
-##      Returns TRUE if -q or -V is used with no other options, or if neither -q
-##      or -V is used.
+##      Returns TRUE if -q or -V is used with no other options (other than -t
+##      or --test), or if neither -q or -V is used.
 ##    IS_EXCLUSIVE --One_Of q V
 ##      Returns TRUE only if one of -q, -qq, -qqq... or -V is used. One of them
 ##      must be used.
@@ -3793,7 +3799,7 @@ function GET_ALL_UNIQUE_NFS_DOMAINS_IN_FSTAB() {
 ##    IS_EXCLUSIVE --Paired_With=2 V a b cc
 ##      Returns TRUE only if -V is used and any two of -a -b or --cc is also used.
 function IS_EXCLUSIVE() {
-  local ALL_OF ARG1 ARGS ASSUME AT_LEAST CHECK_IT_OUT DASH DEFAULT NOT_WITH ONE_OF ONLY_ONE OPTS OPTS_ALL
+  local ALL_OF ARG1 ARGS ASSUME AT_LEAST CHECK_IT_OUT DASH DEFAULT NOT_WITH ONE_OF ONLY_ONE OPTS
   local PAIRED_COUNT PAIRED_WITH
   local EXCLUSIVE_ARRAY EXCLUSIVE_ARRAY_COUNT EXCLUSIVE_COUNT EXCLUSIVE_COUNTS EXCLUSIVE_OPTIONS EXECUTE_ME
   [[ ${1^^} == --STRICT ]] && { STRICT="1" ; shift 1 ; }
@@ -3808,14 +3814,30 @@ function IS_EXCLUSIVE() {
         --ALL_OF)   ALL_OF="1" ; shift 1 ;;
       --AT_LEAST) AT_LEAST="1" ; shift 1 ;;
       --JUST_ONE) shift 1
-                  OPTS_ALL=( ${Opts_All} )		# make an array so easy to count
-                  (( ${#OPTS_ALL[*]} < 2 )) && return	# Zero or one option used so don't have to check
-                  for OPTS in $* ; do
-                    (( ${#OPTS} > 1 )) && DASH="--" || DASH="-"
-                    if [[ " ${Opts_All} " =~ " ${DASH}${OPTS} " ]] ; then
-                      _USAGE_CHOICE_ "IS_EXCLUSIVE: No other option can be used with option ${DASH}${OPTS}."
-                    fi
+                  local DASH i j JUST_ONES OPT OPTS_ALL OPTS_ALL_COUNT THIS_ONE
+                  OPTS_ALL=( ${Opts_All} )		# make an array
+                  OPTS_ALL_COUNT="${#OPTS_ALL[*]}"
+                  for OPT in $* ; do
+                    (( ${#OPT} > 1 )) && DASH="--" || DASH="-"
+                    JUST_ONES+=( ${DASH}${OPT} )
                   done
+                  for i in ${!OPTS_ALL[*]} ; do
+                    if [[ \ ${OPTS_ALL[i]}\  =~ ${_TEST_OPTIONS_} ]] ; then
+                      unset OPTS_ALL[i]
+                      continue
+                    fi
+                    for j in ${!JUST_ONES[*]} ; do
+                      [[ -n ${THIS_ONE} && ${j} != ${THIS_ONE} ]] && continue
+                      if [[ ${OPTS_ALL[i]} == ${JUST_ONES[j]} ]] ; then
+                        [[ -z ${ONE_OPT} ]] && ONE_OPT="${OPTS_ALL[i]}"
+                        unset OPTS_ALL[i]
+                        THIS_ONE="${j}"
+                      fi
+                    done
+                  done
+                  if (( ${#OPTS_ALL[*]} != 0 && OPTS_ALL_COUNT != ${#OPTS_ALL[*]} )) ; then
+                    _USAGE_CHOICE_ "IS_EXCLUSIVE: Only${_TEST_OPTIONS_//|/or}can be used with option ${ONE_OPT}."
+                  fi
                   return
                   ;;
       --NOT_WITH|--PAIRED_WITH*|--ASSUME|--DEFAULT)
@@ -4688,7 +4710,7 @@ function TMP_DIR_DELETE() {
 ##        NEWNAME The TMP file/dir is renamed to the pathname NEWNAME.
 function TMP_FILE_PERMANENT(){
   local Name="file" _TMP_NAME_
-  [[ $1 == --DIR ]] && { Name="directory" ; shift 1 ; }	# File or Ir - just a name
+  [[ $1 == --DIR ]] && { Name="directory" ; shift 1 ; }	# TMPfileVAR points to a directory
   for _TMP_NAME_ in ${!_TMP_NAMES_ARRAY_[*]} ; do
     if [[ ${_TMP_NAME_} == $1 ]] ; then
       [[ -n $2 ]] && mv "${_TMP_NAMES_ARRAY_[${_TMP_NAME_}]}" "$2"
@@ -4785,13 +4807,14 @@ function ERROR_PREFIX() {
 
 ##________________________________________________________________________________
 ##
-## USAGE_SET - Function to invoke a USAGE control function using an option.
+## USAGE_SET - Calls one of the
 ##   Usage: USAGE_SET OPTION
-##          OPTION may be:
-##            -E  USAGE_SET_EXIT
-##            -F  USAGE_FORCE_RETURN
-##            -R  USAGE_SET_RETURN
-## -P [-R] "PFX"  ERROR_SET_PREFIX [ -R ] "PFX" ...
+##   Where: OPTION is one of:
+##     -E  USAGE_SET_EXIT
+##     -F  USAGE_FORCE_RETURN
+##     -R  USAGE_SET_RETURN
+##     -P [-R] "PFX" "TRY"
+##         Calls ERROR_SET_PREFIX [ -R ] "PFX" "TRY"
 function USAGE_SET() {
   local ARG
   case "$1" in
@@ -4908,32 +4931,28 @@ function USAGE_FORCE_OBSOLETE() {
 ##   Calling this function with no ARGS resets the prefix to the default.
 function ERROR_SET_PREFIX() {
   local blk red
-  [[ $1 == -R ]] && { blk="" red="" ; shift 1 ; } || { blk="${DEF}" ; red="${RED}" ; }
+  [[ $1 == -R ]] && shift 1 || { red="${RED}" ; blk="${DEF}" ; }
   if (( $# )) ; then
-    export _USAGE_ERROR_PREFIX_="${red}$1${blk}"
-    export  _USAGE_TRY_PREFIX_="${red}$2${blk}"
     export _USAGE_ERROR_PREFIX_TEXT_="${1}"
-    export _USAGE_ERROR_PREFIX_LEN_="${#1}"
     export _USAGE_TRY_PREFIX_TEXT_="${2}"
-    export _USAGE_TRY_PREFIX_LEN_="${#2}"
   else
-    export _USAGE_ERROR_PREFIX_TEXT_="ERROR: "
-    export _USAGE_ERROR_PREFIX_="${red}${_USAGE_ERROR_PREFIX_TEXT_}${blk}"	# Default USAGE message prefix.
-    export _USAGE_TRY_PREFIX_TEXT_="  Try: "
-    export  _USAGE_TRY_PREFIX_="${red}${_USAGE_TRY_PREFIX_TEXT_}${blk}"	# Default TRY message prefix.
-    export _USAGE_ERROR_PREFIX_LEN_="7"
-    export _USAGE_TRY_PREFIX_LEN_="7"
+    export _USAGE_ERROR_PREFIX_TEXT_="ERROR: "		# Default USAGE message prefix.
+    export _USAGE_TRY_PREFIX_TEXT_="  Try: "		# Default TRY message prefix.
   fi
-  export ERROR_PREFIX_SPACES="$(printf "%*s" ${_USAGE_ERROR_PREFIX_LEN_} "")"
+  export _USAGE_ERROR_PREFIX_="${red}${_USAGE_ERROR_PREFIX_TEXT_}${blk}"
+  export _USAGE_ERROR_PREFIX_LEN_="${#_USAGE_ERROR_PREFIX_TEXT_}"
+  export _USAGE_TRY_PREFIX_="${red}${_USAGE_TRY_PREFIX_TEXT_}${blk}"
+  export _USAGE_TRY_PREFIX_LEN_="${#_USAGE_TRY_PREFIX_TEXT_}"
+  export ERROR_PREFIX_INDENT="$( printf "%*s" ${_USAGE_ERROR_PREFIX_LEN_} )"
 }
-ERROR_SET_PREFIX					# Default USAGE message prefix.
+ERROR_SET_PREFIX					# Set the USAGE message prefix.
 
 ##________________________________________________________________________________
 ##
 ## WARNING - Simple warning reporting with no USAGE message.
 ##   The message is displayed on stderr.
 function WARNING() {
-  echo -e "${WARNING_ERROR_PREFIX}""$@" 1>&2
+  echo -e "${_WARNING_PREFIX_}""$@" 1>&2
   return 0
 }
 
@@ -4948,12 +4967,16 @@ function WARNING() {
 ##     purple characters).
 ##   Calling this function with no ARGS resets the prefix to the default.
 function WARNING_SET_PREFIX() {
-  local pur
-  [[ $1 == -R ]] && { pur="${DEF}" ; shift 1 ; } || pur="${PUR}"
-  if (( $# == 0 ))
-    then export WARNING_ERROR_PREFIX="${pur}WARNING:${DEF} "	# Default WARNING message prefix.
-    else export WARNING_ERROR_PREFIX="${pur}$*${DEF}"
+  local blk pur
+  [[ $1 == -R ]] && shift 1 || { pur="${PUR}" ; blk="${DEF}" ; }
+  if (( $# )) ; then
+    export _WARNING_PREFIX_TEXT_="$*"
+  else
+    export _WARNING_PREFIX_TEXT_="WARNING: "		# Default WARNING message prefix.
   fi
+  export _WARNING_PREFIX_="${pur}${_WARNING_PREFIX_TEXT_}${blk}"
+  export _WARNING_PREFIX_LEN_="${#_WARNING_PREFIX_TEXT_}"
+  export WARNING_PREFIX_INDENT="$( printf "%*s" ${_WARNING_PREFIX_LEN_} )"
 }
 WARNING_SET_PREFIX					# Default WARNING message prefix.
 
@@ -5017,6 +5040,8 @@ function FUNCTIONS_SH_INIT() {
     ERROR_SET_PREFIX					# Default USAGE message prefix.
     WARNING_SET_PREFIX					# Default WARNING message prefix.
   fi
+  [[ -n $BASH_VERSION ]] && shopt -s extglob		# Turn on extended pattern expansion
+  _ERROR_MESSAGE_="" _LOCAL_USAGE_="" _USAGE_OPTIONS_=""
 }
 
 ##________________________________________________________________________________
@@ -5028,7 +5053,7 @@ function FUNCTIONS_SH_INIT() {
 ##          unset == Reset the exported names.
 function _EXPORT_ALL_ () {
   local option
-  if [[ ${BASH_SOURCE[*]} =~ "/etc/profile.d" || ! $- =~ /i/ ]] ; then	# Only if non interactive
+  if [[ ${BASH_SOURCE[*]} =~ "/etc/profile.d" || ! $- =~ i ]] ; then	# Only if non interactive
     FUNCTIONS_SH_INIT ";"
   else
     FUNCTIONS_SH_INIT

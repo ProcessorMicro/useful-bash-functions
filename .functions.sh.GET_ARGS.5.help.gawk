@@ -23,7 +23,8 @@ BEGIN {
   # Note: Commented out lines define variables that don't have to be initialized.
   HELPbasicOptions = " " _h_ " " _help_ " " _H_ " " _HELP_ " " _t_ " " _test_ " " _v_ " " _version_ " "
   # HELPbasicOptsFCs = X				# The <FC> codes to be used for basic options
-  # HELPtestNversionOptions = X				# The options for invoking test and version
+  # HELPtestOptions = X					# The options for invoking test
+  # HELPversionOptions = X				# The options for invoking version
   # HELPhelpOptions = X					# The options for invoking help
   HELPcodesFCandHM = _a_ _b_ _c_ _e_
   # HELPbasicOptsFCsPos = 0				# Remembered position of --Bas_O -F ...

@@ -59,7 +59,8 @@ function psAnalyzeOptsAndArgs(	comment,getoptParsed) {
     if ( GAisDebug ) {
       mainMakeDebugComment( "" )
       mainMakeDebugComment( "======= Variable Assignment for IS_EXCLUSIVE =======" ) }
-    mainMakeBashVariable( "_ALL_OPTIONS_", Bash_ALL_OPTIONS_ ) }
+    mainMakeBashVariable( "_ALL_OPTIONS_", Bash_ALL_OPTIONS_ )
+    mainMakeBashVariable( "_TEST_OPTIONS_", Bash_TEST_OPTIONS_ ) }
   if ( GAisDebug ) {
     mainMakeDebugComment( "" )
     mainMakeDebugComment( "======= Variables Created for the Parent Script =======" )
@@ -87,7 +88,7 @@ function psAnalyzeOptsAndArgs(	comment,getoptParsed) {
 }
 
 function psError(message) {
-  if ( PSerrorMessage ) PSerrorMessage = PSerrorMessage "\n" BashErrorPfx message
+  if ( PSerrorMessage ) PSerrorMessage = PSerrorMessage "\001\n" BashErrorPfx message
   else {
     PSerrorMessage = message }
 }
@@ -235,7 +236,7 @@ function psParseOptsAndArgs(	argsCount,idxA,idxP,isArgs,nextIsValue,optError,opt
               optError[psVar] = 1
             } else {					# The first time for tis Option
               mainMakeBashVariable( psVar, 1 )	# Create the option variable
-              optFound[psVar] = sprintf("Option %s can only be used once. Note: Options%s are synonyms.\nMultiple options detected are: %s", PSOpts[idxP], GAsavedOPTLIST[PSOpt], PSOpts[idxP] )
+              optFound[psVar] = sprintf("Option %s can only be used once.\nNote: Options%s are synonyms.\nMultiple options detected are: %s", PSOpts[idxP], GAsavedOPTLIST[PSOpt], PSOpts[idxP] )
             }
           }
           BashOpts_All = BashOpts_All psOptUsed " "	# The parent script opts encountered (in order)

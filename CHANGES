@@ -1,3 +1,11 @@
+2026.09.26
+Updated ASK and GET_ARGS documentation
+Enhanced "IS_EXCLUSIVE --Just_One ..." to allow the use of -t and --test
+  as well as the single option allowed.
+Updated the USAGE and WARNING functions.
+Fixed some GET_ARGS error messages.
+Updated the documentation in /etc/profile.d/FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
+
 2026.08.31
 Fixed GET_ARGS brief help to correctly manage --Title and --Para directives.
 Added GET_ARGS directive "--Bas_O -R ..." to enable removal of one or all of the

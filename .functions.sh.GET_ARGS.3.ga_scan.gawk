@@ -562,6 +562,10 @@ function scanParseOPTi(		actOpen,actNext,actClose,bashAlt_Opts,count,gaOPTi,idxT
     GAsavedOPTLIST[tokenFirst] = GAsavedOPTLIST[tokenFirst] " " optDash token	# Remember the OPTLIST
     mainMakeBashArray(PSoptsAltArrayVar, optDash token, tokenAlt)
     Bash_ALL_OPTIONS_ = Bash_ALL_OPTIONS_ token " "		# Create a list of every defined option
+    if ( token == _t_ || token == _test_ ) {
+      if ( Bash_TEST_OPTIONS_ ) Bash_TEST_OPTIONS_ = Bash_TEST_OPTIONS_ "| " optDash token " "
+      else Bash_TEST_OPTIONS_ = " " optDash token " "
+    }
     # Add the parsed option definition to the OPTIONS section
     gaOPTi = gaOPTi optComma GAmarkGAoh optDash tokens[idxT] optOpen optEqual optKeyword optClose GArs
     if ( GAinst[Typ] == GAactionType ) {		# It is --Act_D

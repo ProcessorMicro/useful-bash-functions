@@ -129,6 +129,7 @@ function saveComment(theName) {
 
 function saveVars() {
   saveVarDoIt( Bash_ALL_OPTIONS_, "Bash_ALL_OPTIONS_" )
+  saveVarDoIt( Bash_TEST_OPTIONS_, "Bash_TEST_OPTIONS_" )
   saveVarDoIt( HELPless, "HELPless" )
   saveVarDoIt( HELPcolumnSep, "HELPcolumnSep" )
   saveVarDoIt( HELPisCompact, "HELPisCompact" )

@@ -105,13 +105,14 @@ The install script checks fo the the existance of these commands.
 | COMMAND | REQUIREMENT |
 |--|--|
 | bash      | Required. |
-| gawk/awk  | gawk (or a link to awk) is required. |
+| gawk      | Required (or a link to awk). |
 | sort      | Required. |
 | curl      | Required to download the distribution. |
 | python    | Required to extract the distribution. |
 | less      | The default "pager". Required unless you configure a different pager. |
-| nmap      | Only if you use the network functions. |
-| yad       | Only if you use the -G (GUI) option in any "GUI-enabled" functions. |
+| nmap      | Required for the network functions. |
+| dig       | Required for the DNS functions. |
+| yad       | Required for the -G (GUI) option in any "GUI-enabled" functions. |
 
 if you don't have `gawk` then a symbolic link to awk will work as well. This is done by the intall script.
 

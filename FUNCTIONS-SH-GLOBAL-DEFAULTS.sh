@@ -86,13 +86,20 @@ declare -x _GET_ARGS_GLOBAL_HELP_DEFAULT_="c"	# Default <HM> is compressed mode
 ##      b) Recreate the bash parsed variables created by the option scan.
 ##      c) Act as templates for displaying parent script help.
 ##    These files are stored in ${_GET_ARGS_PARSED_HELP_DIR_}/<PARENT_SCRIPT_NAME>
-##    The base pathname, _GET_ARGS_PARSED_HELP_DIR_, defaults to:
-##        ~/.config/${FUNCTIONS_SH_NAME}
+##    The _GET_ARGS_PARSED_HELP_DIR_ (<DIRPATH>) defaults to:
+##        declare -x _GET_ARGS_PARSED_HELP_DIR_=~/.config/${FUNCTIONS_SH_NAME}
 ##      Where FUNCTIONS_SH_NAME is the basename of functions.sh
 ##    Change this location with:
 ##
-##      declare -x GET_ARGS_PARSED_HELP_DIR_="<NEW_PATH>"
+##      declare -x GET_ARGS_PARSED_HELP_DIR_="<DIRPATH>"
 ##
+##    NOTE:  If you ever switch users with "su <NEWUSER>", you must:
+##     Either:
+##       Ensure you use the -l (login) option.Vis:   su -l <NEWUSER>
+##     Or:
+##       Ensure <NEWUSER> has "rw" permission on <DIRPATH>.
+##     Otherwise you may get some permission denied messages whan executing a
+##       parent script.
 ##________________________________________________________________________________
 ##
 ## 4) _GET_ARGS_DONT_SAVE_ENVIRONMENT_ - Create temporary GET_ARGS parsed files.
