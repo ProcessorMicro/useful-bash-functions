@@ -2835,11 +2835,14 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##       with a filter code matching <FC> are displayed. If the GET_ARGS_DIRECTIVE
 ##       "--Filter" is not used, <FC> must not be used.
 ##     BRIEF, COMPACT or EXPAND HELP: <HM>
-##       A <HM> of "b" can be used to display brief help where only the
+##       An <HM> of "b" can be used to display brief help where only the
 ##         sections HEADING, PURPOSE, mypurpose, mysynopsis , SYNOPSIS, OPTIONS,
 ##         BASIC OPTIONS and mybasicoptions are displayed. All text is displayed
-##         as one line with "less" iven if HELP is requested without "less"..
-##       A <HM> of "c" compresses or "e" expands the display.
+##         as one line with "less" even if HELP is requested without "less"..
+##       An <HM> of "c" compresses the display removing empty lines and
+##         converting each leading tab to CTAB spaces.
+##       An <HM> of "e" expands the display with extra spacing and converting
+##         each leading tab to ETAB spaces.
 ##       The three mnemonics for <HM> (b, c and e) can be changed with --Base_O.
 ##
 ##   MODIFYING A BASIC OPTION
@@ -2862,7 +2865,7 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##       short and the long BASEOPT are redefined (e.g. "v" and "version")
 ##       then that default basic option is not available to the parent script.
 ##     Use of "-R BASEOPTSECTION" removes one or more of the generated basic
-#        option sections: HELP (-h ...), TEST (-t ...), or VERSION (-v ...).
+##       option sections: HELP (-h ...), TEST (-t ...), or VERSION (-v ...).
 ##         BASEOPTSECTION can be one of the following codes:
 ##           "a" Remove all the basic option sections.
 ##           "h" Remove the basic option HELP section.
@@ -3984,30 +3987,32 @@ function IS_IP() {
 ##       the variable _ERROR_MESSAGE_ and IS_IP_ALIVE returns FALSE.
 ##   Note: This function uses the command "nmap".
 function IS_IP_ALIVE() {
-  local IP LINE IP_MSG IP_MSG_SEP PLURAL QUIET Var WORD1 WORD2
+  local IP LINE IP_MSG IP_MSG_SEP PLURAL QUIET Var W1 W2 W3
   _ERROR_MESSAGE_=""
-  if [[ $1 == -V ]] ; then
-    Var="$2"
-    eval unset ${Var}			# Default value if no IP was found to be alive.
-    shift 2
-  elif [[ $1 == -Q ]] ; then
-    QUIET="1"
-    shift 1
-  fi
+  while (( $# )) ; do
+    case "$1" in
+    -V) Var="$2"
+        eval unset ${Var}
+        shift 2 ;;
+    -Q) QUIET="1"
+        shift 1 ;;
+     *) break ;;
+    esac
+  done
   if (( $# == 0 )) ; then
     _ERROR_MESSAGE_="No IP addresses or domain names specified.\nUSAGE: IS_IP_ALIVE [ -V VAR ] IPS ..."
     return 1
   fi
-  while read -u 3 WORD1 WORD2 WORD3 REST ; do
-    case "${WORD1}${WORD2}${WORD3}" in
-      Nmapscanreport)
+  while read -u 3 W1 W2 W3 REST ; do
+    case "${W1,,}${W2,,}${W3,,}" in
+      nmapscanreport)
         if [[ ${REST} =~ \( ]]
           then IP="${REST#*\(}"
                IP="${IP%)*}"
           else IP="${REST##for }"
         fi
         ;;
-      Hostisup*)
+      hostisup*)
         if [[ -n ${IP} ]] ; then
           (( QUIET )) && return 0
           [[ -n ${Var} ]] && eval ${Var}=\( \"${IP}\" \) || echo -e "${IP}"
@@ -4685,7 +4690,7 @@ function TMP_FILE_DELETE() {
     else
       rm -r -f "${_TMP_NAMES_ARRAY_[${_TMP_NAME_}]}" &>/dev/null
     fi
-    unset _TMP_NAMES_ARRAY_[${_TMP_NAME_}]
+    eval unset _TMP_NAMES_ARRAY_[${_TMP_NAME_}]
     shift 1
   done
   (( ${#_TMP_NAMES_ARRAY_[*]} == 0 )) && unset _TMP_NAMES_ARRAY_

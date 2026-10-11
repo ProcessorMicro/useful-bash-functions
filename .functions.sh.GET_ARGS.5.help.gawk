@@ -128,12 +128,12 @@ function helpSectionInsertDoIt(helpType,briefHelp,	filterPfx,headerFilterPfx,hel
       helpNL = HELPnl					# Set the <NL> to use if not --Opt_D ...
     } else if ( GAinst[Grp] == GAisTitlePara ) {
       helpNL = HELPnl					# Set the <NL> to use for --Title and --Para
-      if ( GAinst[Typ] != GAisTitle ) {			# --Para
+      if ( GAinst[Typ] == GAisTitle ) {			# --Para
         HELPsectionText = HELPcolumnSep HELPsectionText }	# So move the para text to column 2
     }
     leadingNL = "" }					# No leading <NL>
   else helpNL = HELPnl
-  if ( GAinst[My] ) idxH = GAinst[My]			# The header ix in the "my" section
+  if ( GAinst[My] ) idxH = GAinst[My]			# The header is in the "my" section
   else idxH = idxS					# The header is in this section
   if ( GAdefinedFCs ) {					# Filtering is configured
     helpStoreFCsForHeader(idxH)				# Remember the header section <FC>s
@@ -146,7 +146,7 @@ function helpSectionInsertDoIt(helpType,briefHelp,	filterPfx,headerFilterPfx,hel
       else filterPfx = HELPsepFC GAOptFCs HELPsepFC	# Set filter prefix to the GAOpt one
       headerFilterPfx = HELPsepFC HELPsepFC		# <FC>s to be filled in later
     }
-  } else {						# "Non-briep" help
+  } else {						# "Non-brief" help
     filterPfx = HELPsepFC _a_ HELPsepFC			# Always "all"
     headerFilterPfx = filterPfx
   }
@@ -164,10 +164,14 @@ function helpSectionInsertDoIt(helpType,briefHelp,	filterPfx,headerFilterPfx,hel
       if ( HELPsectionHeaderLength[idxH,helpType] == "" ) leadingNL = ""
       if ( briefHelp ) trailingNL = "" }
     else trailingNL = ""
+    if ( HELPtitleDetected ) {
+      HELPtitleDetected = 0
+      leadingNL = "" }
     if ( leadingNL ) leadingNL = filterPfx leadingNL
     if ( idxH != idxS ) HELPotherSectionHeader[idxH,helpType] = 1
     gsub( /\n/, "&" filterPfx, HELPsectionText )		# Ensure each line begins with a filter code
     HELPsection[idxS,helpType] = HELPsection[idxS,helpType] leadingNL filterPfx indent HELPsectionText helpNL trailingNL
+    if ( GAinst[Typ] == GAisTitle ) HELPtitleDetected = 1
   }
   return 1						# Indicate success
 }

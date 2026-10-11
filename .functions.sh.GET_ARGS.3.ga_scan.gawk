@@ -470,29 +470,29 @@ function scanNormalizeGAOpt(	gaOptPart) {
 
 function scanParseOPTi(		actOpen,actNext,actClose,bashAlt_Opts,count,gaOPTi,idxT,
       optClose,optComma,optDash,optDash1,optEqual,optPart,optKeyword,optMultiple,optOpen,
-      optOptional,optValue,seps,sepsLen,token,tokenAlt,tokenFirst,tokens,tokensLen,tokenVar) {
+      optOptional,optValue,seps,sepsCount,token,tokenAlt,tokenFirst,tokens,tokensCount,tokenVar) {
   GAOptArg = gensub( /^\s+|\s+$/, "", "g", GAOptArg )	# Trim surrounding spaces
   optPart = GAOptArg
   count = sub( /^\*/, "", optPart)			# Look for a beginning "*"
   if ( count ) optMultiple = 1				# This option can occur multiple times in parent args
   count = 0
-  tokensLen = split( optPart, tokens, /\s+|@|::|:/, seps )	# Split into tokens for parsing
-  sepsLen = length(seps)				# The number of separators
+  tokensCount = split( optPart, tokens, /\s+|@|::|:/, seps )	# Split into tokens for parsing
+  sepsCount = length(seps)				# The number of separators
   if ( seps[1] ~ ":" ) {				# Must be a required or optional <VALUE>
     optValue = seps[1]					# Remember the first ":" or "::"
-    if ( seps[sepsLen] == "@" ) {			# Have a <KEYWORD> as well
-      optKeyword = tokens[tokensLen]			# Substitute <KEYWORD> for "VALUE"
-      tokensLen-- }					#   And ignore it in the loop
+    if ( seps[sepsCount] == "@" ) {			# Have a <KEYWORD> as well
+      optKeyword = tokens[tokensCount]			# Substitute <KEYWORD> for "VALUE"
+      tokensCount-- }					#   And ignore it in the loop
     else optKeyword = "VALUE" }
   else {						# No <VALUE>
     optValue = ""					# Make separator a space
     optKeyword = "" } 					#   And no <KEYWORD>}
   optOpen = "" ; optClose = ""				# Initialize
-  for ( idxT=1 ; idxT<=tokensLen ; idxT++ ) {		# Look at each token
+  for ( idxT=1 ; idxT<=tokensCount ; idxT++ ) {		# Look at each token
     if ( seps[idxT] == "@" ) { 				# Error check: found a KEYWORD
-      if ( idxT != sepsLen ) {				# Is the last separator "@" ==> KEYWORD
+      if ( idxT != sepsCount ) {				# Is the last separator "@" ==> KEYWORD
         scanError( sprintf("For \"%s\", \"@KEYWORD\" must be the last argument.", GAOpt) ) }
-      if ( ! tokens[sepsLen+1] ) {			# Found "@" but there is no KEYWORD
+      if ( ! tokens[sepsCount+1] ) {			# Found "@" but there is no KEYWORD
         scanError( sprintf("For \"%s\", the KEYWORD is missing after \"@\".", GAOpt) ) }
     }
     token = tokens[idxT]
@@ -546,10 +546,10 @@ function scanParseOPTi(		actOpen,actNext,actClose,bashAlt_Opts,count,gaOPTi,idxT
       optComma = ", "					# A separator between option aliases
       bashAlt_Opts = bashAlt_Opts optDash token " "	# Remember this OPTi
       GAdefinedOPTi[token] = tokenFirst			# Remember Opti --> Opt1 so we can find the first option
-      if ( GAinst[Typ] == GAactionType ) {		# It is --Act_D do format the output
+      if ( GAinst[Typ] == GAactionType ) {		# It is --Act_D so format the output
         actNext = "|"
         if ( idxT == 2 ) actOpen = "{"
-        if ( idxT == tokensLen ) actClose = "}"
+        if ( idxT == tokensCount ) actClose = "}"
       }
     }
     tokenVar = PSoptPrefixVar token
@@ -575,7 +575,7 @@ function scanParseOPTi(		actOpen,actNext,actClose,bashAlt_Opts,count,gaOPTi,idxT
   if ( GAinst[Typ] == GAhiddenType ) {
     GAskipDes_D = 1					# Never process the --Des_D for preceding --Hid_D
     return }
-  helpSectionInsert( gaOPTi )				# Insert it into the OPTIONS section
+  if ( tokensCount ) helpSectionInsert( gaOPTi )	# Insert it into the OPTIONS section
   if ( GAinst[Typ] == GAactionType ) {			# Is is --Act_D
     split( GAOptInst[GAact_dInst1], GAinst, "" )	# Set the instructions for the ACTION section
     # Insert the ACTION text.

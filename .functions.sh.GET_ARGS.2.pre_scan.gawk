@@ -82,6 +82,8 @@ function preScanGAOpts(		basicOptionError) {
   preGAOptSearch( "--Action" )				# --Action
   GAtestAction[Cat] = 0					# Reset as is tested again in ga_scan
   preSetEBCdefaults()					# The default <HM> info
+
+  preGAOptSearch( "--Act" )				# --Act_D
 }
 
 function preError(message) {
