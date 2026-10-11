@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.1.main.gawk
 #
 # PURPOSE = "This is the main gawk script called by GET_ARGS."
-# VERSION = "14.01.06 - Jul 01, 2026"
+# VERSION = "14.01.11 - Oct 10, 2026"
 #
 # This gawk script is executed by the GET_ARGS function in /usr/local/bin/functions.sh
 # It provides a pre-scan of the GET_ARGS_DIRECTIVES, followed by a full scan. And a scan

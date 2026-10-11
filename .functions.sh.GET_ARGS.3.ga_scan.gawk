@@ -5,7 +5,7 @@
 #
 # PURPOSE = "These functions will scan the GET_ARGS_DIRECTIVES
 #            and create the necessaty environment for parsing parent script options."
-# VERSION = "14.01.06 - Jul 01, 2026"
+# VERSION = "14.01.11 - Oct 10, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #

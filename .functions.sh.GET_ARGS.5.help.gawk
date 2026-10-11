@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.5.help.gawk
 #
 # PURPOSE = "This script implements GET_ARGS help functionality."
-# VERSION = "14.01.07 - Aug 30, 2026"
+# VERSION = "14.01.11 - Oct 10, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #

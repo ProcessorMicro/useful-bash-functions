@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.0.globals.gawk
 #
 # PURPOSE = "This gawk script identifies/defines some of the global variables."
-# VERSION = "14.01.07 - Aug 31, 2026"
+# VERSION = "14.01.11 - Oct 10, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #

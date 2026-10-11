@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.6.restore.gawk
 #
 # PURPOSE = "These functions restore the saved variable values necessary to scan the parent script options."
-# VERSION = "14.01.06 - Jul 01, 2026"
+# VERSION = "14.01.11 - Oct 10, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
