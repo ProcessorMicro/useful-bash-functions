@@ -2,7 +2,7 @@
 # vim: set nomodified number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
 SCRIPT_PURPOSE_COMMON_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
-SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.01.11 - Oct 10, 2026"
+SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.01.12 - Oct 12, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -1848,6 +1848,7 @@ function _ASK_WITH_MENU_DOIT_() {
   fi
   _VIDX_="-1"						# The index into the answer values
   for _SIDX_ in "${_MENU_ANSWER_[@]}" ; do		# The answer values are the selectors
+    [[ -z ${_SIDX_} ]] && continue			# Ignore an empty response
     (( _VIDX_++ ))
     eval _AIDX_="\${_SELECTOR_INDEX_MAP_[${_SIDX_}]}"	# Get the original array index
     eval ${_MENU_ANSWER_VARIABLE_}[_VIDX_]=\"${_SIDX_}\"
