@@ -1848,9 +1848,13 @@ function _ASK_WITH_MENU_DOIT_() {
   fi
   _VIDX_="-1"						# The index into the answer values
   for _SIDX_ in "${_MENU_ANSWER_[@]}" ; do		# The answer values are the selectors
-    [[ -z ${_SIDX_} ]] && continue			# Ignore an empty response
     (( _VIDX_++ ))
-    eval _AIDX_="\${_SELECTOR_INDEX_MAP_[${_SIDX_}]}"	# Get the original array index
+    if [[ -z ${_SIDX_} ]] ; then			# Process an empty response
+      _SIDX_=""
+      _AIDX_="123456789"				# An unlikely array index which returns an empty value
+    else
+      eval _AIDX_="\${_SELECTOR_INDEX_MAP_[${_SIDX_}]}"	# Get the original array index
+    fi
     eval ${_MENU_ANSWER_VARIABLE_}[_VIDX_]=\"${_SIDX_}\"
     eval ${_MENU_ANSWER_VARIABLE_}'_IDX[_VIDX_]="'${_AIDX_}'"'
     if (( _IS_ARGS_ )) ; then
@@ -3232,9 +3236,13 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##          options defined in the last preceeding --Opt_D, --Act_D or --Hid_D.
 ##          It is recommended (but not mandatory) a --Des_D immediately follow
 ##          each option definition.
-##       4) If any conflicting GET_ARGS_DIRECTIVES are used, the last one is the
-##          one that takes effect.one
-##       5) The following GET_ARGS_DIRECTIVES can only be specified once:
+##       4) All special action directives with an empty OPTLIST:
+##            --Act[ion]_D[efinition] [FCLIST] "" ...
+##          must appear before any --Opt_d --Act_D or --Hid_D directives.
+##          Otherwise the expanded help line spacing will not be correct.
+##       5) If any conflicting GET_ARGS_DIRECTIVES are used, the last one is the
+##          one that takes effect.
+##       6) The following GET_ARGS_DIRECTIVES can only be specified once:
 ##            --Args_...  --Opts_...  --Heading   --Expand  --Brief
 ##            --Compact   --Default   --Tabs      --Action  --Copyright
 ##            --Cmd       --Var       --Pager     --Debug
