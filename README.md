@@ -679,7 +679,7 @@ FIND-FUNCTIONS -H
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
 
-### <a id="filter-example"><br>&nbsp;&nbsp;&nbsp;&nbsp;Example of the GET_ARGS --Filter Directive</a>
+### <a id="filter-example"><br>Example of the GET_ARGS --Filter Directive</a>
 
 The `GET_ARGS` --Filter directive is useful if a parent script has many options.
 Filtering is a mechanism that allows selected portions of the HELP to be displayed.
