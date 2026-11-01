@@ -32,6 +32,8 @@ ASK can interact with the user with a text-based interface or a GUI dialog box i
 
 -----------------------------
 
+
+
 ## <a id="contents">Contents</a>
 
 &nbsp;&nbsp;&nbsp;&nbsp;[Purpose](#purpose)<br>
@@ -56,7 +58,7 @@ ASK can interact with the user with a text-based interface or a GUI dialog box i
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Examples of Help Implemented by GET_ARGS](#example-of-help)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[IS_EXCLUSIVE](#is-exclusive)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Example of GET_ARGS and IS_EXCLUSIVE working together](#example-of-get-args)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[The GET_ARGS --Filter Directive](#filter-example)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Example of the GET_ARGS --Filter Directiv](#filter-example)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASK Functions](#ask-functions)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TMP_FILE_CREATE Functions](#tmp-file-create-functions)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[Examples of Functions](#examples-of-functions)<br>
@@ -691,7 +693,7 @@ FILTER_EXAMPLE -H
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
 
-### <a id="ask-functions"><br>&nbsp;&nbsp;&nbsp;&nbsp;ASK Functions</a>
+### <a id="ask-functions"><br>ASK Functions</a>
 
 The basic functionality of the set of `ASK` functions (`ASK`, `ASK_GUI`, `ASK_WITH_MENU`, `ASK_WITH_MENU_GUI`)
 is to display statements or questions (the prompt) to a user and to record the response.
