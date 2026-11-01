@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.0.globals.gawk
 #
 # PURPOSE = "This gawk script identifies/defines some of the global variables."
-# VERSION = "14.01.11 - Oct 10, 2026"
+# VERSION = "14.02.01 - Oct 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -230,13 +230,15 @@ BEGIN {
   ## BashPostCmd = X					# BASH The bash command to be executed after PS parsing
 
   # The following define the variable names created by the parent script option/argument scan
-  PSvarListCount = 6					# The number of varile names in the VARLIST
+  PSvarListCount = 7					# The number of variable names in the VARLIST
   PSoptPrefixVar = "Opt_"				# The bash variable prefix for options discovered
   PSoptSuffixVar = "_Val"				# The bash variable suffix for option values discovered
   PSoptsAllListVar = "Opts_All"				# The bash list variable containg each option encountered
+  PSoptsAllListCount = 0				# The Opts_All position of any opttion
   PSaltOptsArrayVar = "Alt_Opts"			# The bash array containing alternate option spellings
   PSoptsAltArrayVar = "Opts_Alt"			# The bash array containing alternate option to option 1
   PSargsArrayVar = "Args"				# The bash array containing the arguments
+  PSsuffixPos = "_Pos"					# The bash variable suffix for arg and option positions
 
   # HELP display pager variables
   ## BashPager = X					# The assigned pager

@@ -2,7 +2,7 @@
 # vim: set nomodified number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
 SCRIPT_PURPOSE_COMMON_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
-SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.01.12 - Oct 12, 2026"
+SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.02.01 - Oct 31, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -273,6 +273,8 @@ function DO_HELP() {
 ##                      that matches the menu choice made.
 ##   Args[*]            Array containing the non-option arguments in a parent
 ##                      script. Set by GET_ARGS when parsing script options.
+##   Args_Pos[*]        Array containing the position of each argument on the
+##                      command line.
 ##   ASK_ANSWER_IS_ALL  Variable is set by the function ASK if the response is
 ##                      for all items.
 ##   ASK_WITH_MENU_NUMBER
@@ -319,7 +321,8 @@ function DO_HELP() {
 ##                      script environment. Vis: export LOCAL_PCS="pc1 pc2"
 ##   _MOUNTED_FS_ARRAY_ An array set internally containing the filesystems
 ##                      mounted by MOUNT_IT. It is unset by default.
-##   Opt_x Opt_x_Val    Where 'x' is the 1st option name in OPTLIST. Set by
+##   Opt_x[*] Opt_x_Val[*] Opt_x_Pos[*]
+##                      Where 'x' is the 1st option name in OPTLIST. Set by
 ##                      GET_ARGS when parsing script options.
 ##   Alt_Opts[-X]       Contains a list of the other options in OPTLIST for
 ##                      option -X (OPT1 = the first one).
@@ -2559,6 +2562,10 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##   # Use of the 4-characters sequence space dash dash space ( -- ) within any   #
 ##   #   GET_ARGS_DIRECTIVE argument may prematurely terminate parsing of the     #
 ##   #   remaining GET_ARGS_DIRECTIVES.                                           #
+##   # When a parent script is invoked, GET_ARGS parses any command line argument #
+##   #   that begin with a "-" as if it were an option. Except each argument      #
+##   #   following a  "--" argument is always treated as an argument even if it   #
+##   #   begin with a "-".                                                        #
 ##   ##############################################################################
 ##
 ##   HELP DISPLAY
@@ -2657,12 +2664,14 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##              --Opt_D "question ? and" --Opt_D "plus +"
 ##           The variables Opt_plus and Opt_question are created and you can use
 ##           the options -? and -+ when invoking the parent script.
-##         The variables Opt_OPT1 and Opt_OPT1_Val (where "OPT1" is replaced by
-##           the first option in OPTLIST) are unset by GET_ARGS when parsing
-##           GET_ARGS_DIRECTIVES. When parsing the parent script options, the
-##           value of the option variable Opt_OPT1 is set to the number of times
-##           that option is used. If : or :: follows OPTi, the array Opt_OPT1_Val
-##           is set to the values of the option.
+##         The variables Opt_OPT1, Opt_OPT1_Val and Opt_OPT1_Pos (where "OPT1" is
+##           replaced by the first option in OPTLIST) are unset by GET_ARGS when
+##           parsing GET_ARGS_DIRECTIVES. When parsing the parent script options,
+##           the value of the option variable Opt_OPT1 is set to the number of
+##           times that option is used. If : or :: follows OPTi, the array
+##           Opt_OPT1_Val is set to the values of the option. And the array
+##           Opt_OPT1_Pos records the option position on the command line. See
+##           POSITIONS below.
 ##         If OPT1 contains any character other than alphanumeric or underscore,
 ##           the characters are converted to "_" when creating the corresponding
 ##           bash variable. E.G. For an OPTLIST
@@ -2670,19 +2679,22 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##           variable names "Opt_long_opt" and "Opt_long_opt_Val"..
 ##         If an option has or requires a VALUE, the Opt_OPT1_Val variable is a
 ##           zero-based array containing one element for each similar OPT1 option
-##           encountered. E.G. ${Opt_OPTi_Val[0], ${Opt_OPTi_Val[1]} ...
+##           encountered. E.G. ${Opt_OPT1_Val[0], ${Opt_OPT1_Val[1]} ...
 ##           and Opt_OPT1 contains the number of elements in the array.
+##         In addition a zero-based array Opt_OPT1_Pos[i] contains the command
+##           line position of the OPTi option. See POSITIONS below.
 ##         After invoking GET_ARGS, the parent script can test if any single
 ##           OPTi has been specified on the command line with:
 ##             if (( Opt_OPT1 )) ; then ...
-##
-##       GET_ARGS creates a variable "Opts_All" which contains a space separated
-##         list of all options used (in that order but no values) at parent script
-##         invocation. Only the OPT1 option is used in the list. The remaining
-##         OPTi can be accessed with ${Alt_Opts["${OPT1}"]}
+##         GET_ARGS creates a variable "Opts_All" which contains a space separated
+##           list of all options used (in the order encountered, but no values) at
+##           parent script invocation. Each option is preceeded by "-" or "--" as
+##           appropriate.
+##         Only the OPT1 option is used in the list. The remaining  OPTi can be
+##           accessed with ${Alt_Opts["${OPT1}"]}
 ##         If OPTLIST begins with a "*" then Opts_All will contain each occurence
-##         of OPTi as it is encountered in the calling script.
-##           EXAMPLE: CMD is invoked as:  CMD -x -YYY -z aaa -z bbb -z ccc
+##           of OPTi as it is encountered in the calling script.
+##         EXAMPLE: CMD is invoked as:  CMD -x -YYY -z aaa -z bbb -z ccc
 ##           To parse the options used in the order they were specified, use:
 ##             for OPT in ${Opts_All} ; do
 ##               case "${OPT}" in
@@ -2716,7 +2728,6 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##               ${Opts_Alt["-x"]} expands to: " -x "
 ##               ${Opts_Alt["--extra"]} expands to: " -x "
 ##               ${Opts_Alt["-X"]} expands to: " -x "
-##
 ##
 ##     --Des[cription]_D[efinition] OPTION_DESCRIPTION
 ##         This GET_ARGS_DIRECTIVE must immediately follow --Opt_D, --Hid_D or
@@ -2973,6 +2984,8 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##
 ##     All arguments are placed in the array Args[*] (origin 1) in the order
 ##       encountered at parent script invocation.
+##     In addition an array (origin 1) Args_Pos[i] contains the command line
+##       position of the argument. See POSITIONS below.
 ##     Note: --Args_None, --Args_Req, --Args_Min, --Args_Max, --Args_Opt,
 ##           --Args_Array and --Args_List are mutually exclusive.
 ##     If @KEYWORD is included then, in the SYNTAX section of the HELP message,
@@ -3265,27 +3278,31 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##
 ##   BASH VARIABLES
 ##     --Var[iables] VARLIST
-##       Modify the six bash variable names created by GET_ARGS. VARLIST is a
+##       Modify the seven bash variable names created by GET_ARGS. VARLIST is a
 ##         comma separated, positional list that reassigns those variable names.
 ##       When the parent script is invoked, GET_ARGS parses the options and
 ##         arguments on the command line and creates variables that represent
 ##         what was specified by --Var.
-##       The VARLIST positional syntax is: "OPT,VAL,OPTSALL,ALTOPT,OPTALT,ARGS"
+##       The VARLIST positional syntax is:
+##           "OPT,VAL,POS,OPTSALL,ALTOPT,OPTALT,ARGS"
 ##       Where:
 ##         KEY  POSITION TYPE  DEFAULT        Description
 ##         OPT     1    Prefix Opt_      Options detected. E.G. -f myfile
 ##                                       creates:  Opt_f=1
-##         VAL     2    Suffix _Val      Option values detected. E.G. -f myfile
-##                                       creates array: Opt_f_Val[0]="myfile"
-##         OPTSALL 3    List   Opts_All  A space separated list of all options
+##         VAL     2    Suffix _Val      Option values detected.
+##                                       E.G.  CMD -f myfile
+##                                         creates array: Opt_f_Val[0]="myfile"
+##         POS     3    Suffix _Pos      The option position in CMD line.
+##                                       See POSITIONS beloa,
+##         OPTSALL 4    List   Opts_All  A space separated list of all options
 ##                                       detected on the command line (in order).
-##         ALTOPT  4    Array  Alt_Opts  Each element has the alternate spellings
+##         ALTOPT  5    Array  Alt_Opts  Each element has the alternate spellings
 ##                                       E.G.: Alt_Opts[-f]=" -f --fi --file "
-##         OPTALT  5    Array  Opts_Alt  Each element has the alternate spellings
+##         OPTALT  6    Array  Opts_Alt  Each element has the alternate spellings
 ##                                       E.G.: Opts_Alt["-f"]=" -f "
 ##                                             Opts_Alt["--fi"]=" -f "
 ##                                             Opts_Alt["--file"]=" -f "
-##         ARGS    6    Array  Args      The arguments detected (index origin=1).
+##         ARGS    7    Array  Args      The arguments detected (index origin=1).
 ##       The default VARLIST name assignments are:
 ##         --Var "Opt_,_Val,Opts_All,Alt_Opts,Opts_Alt,Args"
 ##       VARLIST can have empty names and may have fewer than 6 entries.
@@ -3297,6 +3314,25 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##          and seemingly inappropriate difference was purposely done to make
 ##          it extremly unlikely both functions would generate the same
 ##          variable name.
+##
+##   POSITIONS
+##     GET_ARGS records the position of each option and argument in the variable
+##       arrays Opt_OPT1_Pos[*] and Args_Pos[*]. This allows the parent script to
+##       define positional options that apply only to subsequent command line
+##       arguments and options. The position recorded references the expanded
+##       command line. The CMD is position 1. Assuming the command:
+##         CMD -qf ARG1 -c1 -x ARG2 --col=2 ARG3
+##       Is expanded to (-c and --col are synonyms):
+##         CMD -q -f ARG1 -c "1" -x ARG2 --col "2" ARG3
+##       Creates values:
+##           Opt_q_Pos[0]=2
+##           Opt_f_Pos[0]=3
+##           Args_Pos[1]=4
+##           Opt_c_Pos[0]=5
+##           Opt_x_Pos[0]=7
+##           Args_Pos[2]=8
+##           Opt_c_Pos[1]=9
+##           Args_Pos[3]=11
 ##
 ##   IMPLEMENTATION
 ##     GET_ARGS executes the following process steps:
@@ -4116,8 +4152,9 @@ function IS_UUID() {
 ##
 ## MOUNT_IT - Mount the filesystem $1 onto directory $2 and remember where it
 ##     was mounted.
-##   Usage: MOUNT_IT FILESYSTEM [ WHERE ] [ MOUNT_OPTIONS]
+##   Usage: MOUNT_IT [-Q] FILESYSTEM [ WHERE ] [ MOUNT_OPTIONS]
 ##   Where:
+##     -Q Quiet. Don't issue any warning messages.
 ##     FILESYSTEM can be a device special file (/dev/...), an NFS mount
 ##       (aa.bb.cc:/PATH) or a UUID ( UUID=...)
 ##     WHERE is the pathname of mount point. It must be a directory that exists.
@@ -4129,16 +4166,18 @@ function IS_UUID() {
 ##         directory is made until a matching directory is found or the root
 ##         directory is reached.
 ##     MOUNT_OPTIONS are any options acceptable to the mount command.
-##   Note: The entries in /etc/fstab must include the "user" option. Examples:
-##     asus:/data     /mnt ext4 defaults,noauto,rw,user 0 0
-##     UUID=1a9...6cd /mnt vfat defaults,noauto,rw,user 0 0
+##   Note: If MOUNT_IT is called by any userid other than "root", the entries
+##         in /etc/fstab must include the "user" option. Examples:
+##     mypc:/data      /mnt ext4 defaults,noauto,rw,user 0 0
+##     UUID=1a9...6cd  /mnt vfat defaults,noauto,rw,user 0 0
 
 unset _MOUNTED_FS_ARRAY_ ; declare -a _MOUNTED_FS_ARRAY_
 _MOUNTED_FS_ARRAY_IDX_="0"
 
 function MOUNT_IT() {
-  local IS_LV SUDO NFS_SERVER NFS_WHAT_CANON TEST_WHAT_CANON WHAT_CANON WHAT_FS WHAT_ORIG WHERE_CANON WHERE_FS WHERE_ORIG
+  local IS_LV SUDO NFS_SERVER NFS_WHAT_CANON QUIET TEST_WHAT_CANON WHAT_CANON WHAT_FS WHAT_ORIG WHERE_CANON WHERE_FS WHERE_ORIG
   IS_ROOT || SUDO="sudo"
+  [[ $1 == -Q ]] && { QUIET=1 ; shift 1 ; }
   if [[ $# == 1 || ${2:0:1} == - ]]			# $1 alone or with MOUNT_OPTIONS
     then _MOUNT_IT_FIND_IN_FSTAB_ "$1"			# Set the values for WHAT and WHERE: XXX_ORIG, XXX_CANON, XXX_FS
          shift 1					# Remaining args are MOUNT_OPTIONS
@@ -4150,7 +4189,7 @@ function MOUNT_IT() {
          WHERE_FS="$2"
          shift 2					# Remaining args are MOUNT_OPTIONS
   fi
-  [[ -d ${WHERE_CANON} ]] || _USAGE_CHOICE_ "MOUNT_IT: Mount point '${WHERE_CANON}' does not exist."
+  [[ -d ${WHERE_CANON} ]] || _USAGE_CHOICE_ "MOUNT_IT: Mount point \"${WHERE_CANON}\" does not exist."
   if (( ! NFS )) && [[ ! ${WHAT_CANON} =~ : ]] ; then
     [[ -b ${WHAT_CANON} ]] || _USAGE_CHOICE_ "MOUNT_IT: Filesystem \"${WHAT_CANON}\" doesn't exist or is not a block device."
     TEST_WHAT_CANON="${WHAT_CANON}"
@@ -4158,14 +4197,14 @@ function MOUNT_IT() {
     TEST_WHAT_CANON=":${NFS_WHAT_CANON}"
   fi
   if mount | grep -q "${TEST_WHAT_CANON}.*${WHERE_CANON}" ; then
-    echo -e "Note: '${WHAT_CANON}' is already mounted onto '$WHERE_CANON'. It will be used as-is."
+    (( ! QUIET )) && WARNINH "\"${WHAT_CANON}\" is already mounted onto \"$WHERE_CANON\". It will be used as-is."
   else
     if IS_LOGICAL_VOLUME "${WHAT_CANON}"
       then IS_LV="YES"
            ${SUDO} lvchange -ay "${WHAT_CANON}"
       else IS_LV="NO"
     fi
-    ${SUDO} mount "$@" "${WHAT_CANON}" "${WHERE_CANON}" || _USAGE_CHOICE_ "MOUNT_IT: Error mounting '$1' onto '$2'."
+    ${SUDO} mount "$@" "${WHAT_CANON}" "${WHERE_CANON}" || _USAGE_CHOICE_ "MOUNT_IT: Error mounting \"$1\" onto \"$2\"."
   fi
   # Remember where it was mounted and whether it is a logical volume
   _MOUNTED_FS_ARRAY_[_MOUNTED_FS_ARRAY_IDX_++]="${WHAT_CANON} ${WHERE_CANON} ${WHAT_FS} ${WHERE_FS} ${WHAT_ORIG} ${WHERE_ORIG} ${IS_LV}"
@@ -4177,7 +4216,7 @@ function _MOUNT_IT_FIND_IN_FSTAB_() {
   local ERROR_CODE=0 ERROR_TRESHOLD=0 FSTAB_LINE NFS=0 NUM_PATTERN="[0-9]*"
   local NFS_SERVER NFS_WHAT_CANON WHAT_CANON WHAT_ORIG WHERE_FS WHERE_ORIG WHERE_CANON
   set -o pipefail
-  case "$1" in
+  case "$(realpath $1)" in
     UUID=*)						# Identify device by UUID ==> UUID="..."
       WHAT_CANON="$( lsblk --noheadings --output UUID ${1} )" ; ERROR_CODE="$?"
       ;&						# Continue to next pattern

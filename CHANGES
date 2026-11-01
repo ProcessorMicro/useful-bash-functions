@@ -1,3 +1,9 @@
+2026.11.01
+When a parent script is executed, GET_ARGS now saves the position of each
+option in the array Opt_OPT1_Pos[i] and each argument in the array
+Args_Pos[i]). These arrays then enable the use of positonal options and
+arguments the affect the properties of subsequent options and arguments.
+
 2026.10.17
 Minor changes
 

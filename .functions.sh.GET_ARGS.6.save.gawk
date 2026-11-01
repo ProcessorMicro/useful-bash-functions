@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.6.save.gawk
 #
 # PURPOSE = "These functions save the variable values necessary to scan the parent script options."
-# VERSION = "14.01.11 - Oct 10, 2026"
+# VERSION = "14.02.01 - Oct 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -152,6 +152,7 @@ function saveVars() {
   saveVarDoIt( PSregexVersion, "PSregexVersion" )
   saveVarDoIt( PSoptPrefixVar, "PSoptPrefixVar" )
   saveVarDoIt( PSoptSuffixVar, "PSoptSuffixVar" )
+  saveVarDoIt( PSsuffixPos, "PSsuffixPos" )
   saveVarDoIt( PSoptsAllListVar, "PSoptsAllListVar" )
   saveVarDoIt( PSargsArrayVar, "PSargsArrayVar" )
   saveVarDoIt( Cat, "Cat" )				# Indices for arrays GAtestArgs and GAtestOpts

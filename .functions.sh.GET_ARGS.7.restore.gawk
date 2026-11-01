@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.6.restore.gawk
 #
 # PURPOSE = "These functions restore the saved variable values necessary to scan the parent script options."
-# VERSION = "14.01.11 - Oct 10, 2026"
+# VERSION = "14.02.01 - Oct 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -146,6 +146,8 @@ function restoreHelpFilterInfo(		filter,nl) {
     filter = HELPsepFC GAdefinedFCs HELPsepFC
     if ( ! HELPisBrief ) nl = filter HELPnl
     print nl filter "\tFiltered HELP for filter code \"" HELPfilterCode "\": " GAdefinedFCdescriptions[HELPfilterCode] > SAVEhelpFI
+  } else {
+    system( "cat /dev/null > " SAVEhelpFI )
   }
 }
 

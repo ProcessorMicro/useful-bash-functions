@@ -5,7 +5,7 @@
 #
 # PURPOSE = "These functions do a pre-scan of the GET_ARGS_OPTS to locate GAOpts that will influence
 #            the information collected during the GAOpts "full" scan and the parent script options scan."
-# VERSION = "14.01.11 - Oct 10, 2026"
+# VERSION = "14.02.01 - Oct 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -114,8 +114,13 @@ function preGAOptSearch(gaOptPart) {
       case "--Action":					# --Action
         scanIsDuplicate( GAtestAction, GAOpt, GAtypeIsText )
         preGetNextArg()
-        GAdes_dAction = GAmarkGAah GAOptArg ":" GArs		# Remember the ACTION keyword
-        HELPsynopsisAction = " " GAmarkGAah GAOptArg GArs	# Don't really need this but code easier to read
+        if ( GAOptArg ) {
+          GAdes_dAction = GAmarkGAah GAOptArg GArs		# Remember the ACTION keyword
+          HELPsynopsisAction = " " GAmarkGAah GAOptArg GArs	# Don't really need this but code easier to read
+        } else {
+          GAdes_dAction = "\010"			# No ACTION - erase the space
+          HELPsynopsisAction = " "
+        }
         continue
       case "--Bas":
         preParseNewBasicOption()
@@ -470,25 +475,31 @@ function preParseVarNames(	count,idxV,message,varNames) {
           PSoptSuffixVar = varNames[idxV]
         }
         continue
-      case 3:						# List OPTSALL
+      case 3:						# Suffix POS
+        if ( varNames[idxV] ) {
+          PREtmpMessage = PREtmpMessage "  " PSsuffixPos "=" varNames[idxV]
+          PSsuffixPos = varNames[idxV]
+        }
+        continue
+      case 4:						# List OPTSALL
         if ( varNames[idxV] ) {
           PREtmpMessage = PREtmpMessage "  " PSoptsAllListVar "=" varNames[idxV]
           PSoptsAllListVar = varNames[idxV]
         }
         continue
-      case 4:						# Array ALTOPT
+      case 5:						# Array ALTOPT
         if ( varNames[idxV] ) {
           PREtmpMessage = PREtmpMessage "  " PSaltOptsArrayVar "=" varNames[idxV]
           PSaltOptsArrayVar = varNames[idxV]
         }
         continue
-      case 5:						# Array OPTALT
+      case 6:						# Array OPTALT
         if ( varNames[idxV] ) {
           PREtmpMessage = PREtmpMessage "  " PSoptsAltArrayVar "=" varNames[idxV]
           PSoptsAltArrayVar = varNames[idxV]
         }
         continue
-      case 6:						# Array ARGS
+      case 7:						# Array ARGS
         if ( varNames[idxV] ) {
           PREtmpMessage = PREtmpMessage "  " PSargsArrayVar "=" varNames[idxV]
           PSargsArrayVar = varNames[idxV]
@@ -499,7 +510,7 @@ function preParseVarNames(	count,idxV,message,varNames) {
   if ( GAisDebug && length(PREtmpMessage) > 0 ) {	# Debug mode requested
     message = HELPnl "# " HELPnl "# ======= Variable Reassignment ======="
     message = message HELPnl "# Requested: --Var \"" GAOptArg "\""
-    message = message HELPnl sprintf("#       New: --Var \"%s,%s,%s,%s,%s,%s\"", PSoptPrefixVar, PSoptSuffixVar, PSoptsAllListVar, PSaltOptsArrayVar, PSoptsAltArrayVar, PSargsArrayVar)
+    message = message HELPnl sprintf("#       New: --Var \"%s,%s,%s,%s,%s,%s,%s\"", PSoptPrefixVar, PSoptSuffixVar, PSsuffixPos, PSoptsAllListVar, PSaltOptsArrayVar, PSoptsAltArrayVar, PSargsArrayVar)
     message = message HELPnl "#   Changed:" substr(PREtmpMessage,2)
     PREtmpMessage = message
   }

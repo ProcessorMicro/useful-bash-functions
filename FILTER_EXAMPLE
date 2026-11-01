@@ -1,0 +1,232 @@
+#!/bin/bash
+
+SCRIPT_PURPOSE="Example of the GET_ARGS --Filter directive."
+SCRIPT_VERSION="01.01.01 - Nov 01, 2026"
+
+# Copyright (C) 2013-2026 by Mike Armstrong
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy (the file 'LICENSE') of the GNU General Public
+# License along with this program; if not, see <https://www.gnu.org/licenses>.
+
+# Initialize functions.sh if preloaded into the environment. Otherwise locate and load functions.sh
+if (( _functions_sh_loaded_ )) ; then		# Is functions.sh loaded?
+  FUNCTIONS_SH_INIT				# Initialize functions.sh
+else						# functions.sh not loaded
+  COMMON_FUNCTIONS="$(type -p functions.sh)"	# Locate and load functions.sh
+  [[ -x ${COMMON_FUNCTIONS} ]] && source "${COMMON_FUNCTIONS}" || { echo -e "Cannot locate "${COMMON_FUNCTIONS:-functions.sh}"." 1>&2 ; exit ; }
+fi
+
+# The following names are hard linked to the script ${DNF}. The character "@" is used for formatting output for help.
+ALIAS_NAMES="@dnfe  dnfhi  dnfhl  dnfhs  dnfhu  dnfi  dnfl  dnfL  dnflsd  dnfn  dnfp  dnfr  dnfR  dnfu  dnfua"
+
+UNAME_GLOB="$(uname -r)"
+HARDWARE_PLATFORM_GLOB="${UNAME_GLOB##*.}"
+unset ONLY_HARDWARE_PLATFORM_GLOB
+[[ ${HARDWARE_PLATFORM_GLOB} == x86_64 ]] && OTHER_HARDWARE_PLATFORM_GLOB="i686" || OTHER_HARDWARE_PLATFORM_GLOB="x86_64"
+FILE_OUT_DIR="/tmp/"				# MUST end with '/'
+###### SAVE
+eval FEDORA_RELEASE_GLOB=\"\${UNAME_GLOB%*.${HARDWARE_PLATFORM_GLOB}}\"
+FEDORA_RELEASE_GLOB=${FEDORA_RELEASE_GLOB##*.}
+NEW_RELEASE="$(( ${FEDORA_RELEASE_GLOB:2} + 1 ))"
+FILE_OUT_PREFIX="dnf"
+FILE_OUT_SUFFIX="$(uname -r | cut -f 4 -d .).txt"
+###### SAVE
+TEST_INFO="Command generated is:"
+ASSUMED_ANSWER_DEFAULT="--assumeyes"		# THe default response to the 'Continue ... OK?...' question
+ASSUMED_ANSWER="${ASSUMED_ANSWER_DEFAULT}"
+
+function INSTALL_NEW_RELEASE() {
+  (( Opt_document_one_alias_name )) && DOCUMENT_SHORT_NAME "INSTALL_NEW_RELEASE ==> Displays a menu of actions to implement a new release"
+  local Less INFO="/info.$((NEW_RELEASE-1))"
+  local DEFAULT_HISTORY_FILE="${INFO}/${FILE_OUT_PREFIX}.history.userinstalled.${FILE_OUT_SUFFIX}"
+  local MENU_ARRAY MENU_HEADER MENU_LINE OUTPUT_FILE="/tmp/dnf.system-upgrade-download.output"
+  [[ -z ${LESS} ]] && Less="        " || Less="${LESS}"
+  Sep="\n   ==================================================="
+  MENU_HEADER="Installation of a new Fedora release.${Sep}\n   Note: Ensure power management is disabled.\n         Ensure no bash jobs (in any tab) are running.${Sep}\nSelect the command to execute (normally you should execute them in order):"
+  MENU_ARRAY=(
+      ": ==== ${UL}PREPARE FOR UPGRADE${DEF} ====          # ============================================"
+      "FEDORA-ISO-DOWNLOAD                      # Get the Fedora ${NEW_RELEASE} Workstation ISO file."
+      "dnf5 install dnf-plugin-system-upgrade remove-retired-packages rpmconf meld     # Needed software."
+      "dnfu -- --refresh                        # Ensure latest changes are installed (then reboot)."
+      "eval DNF --hu=\"\${DEFAULT_HISTORY_FILE}\"  # Write all user-installed software (sorted)\n                                                 #   into \"${DEFAULT_HISTORY_FILE}\"."
+      ": ==== ${UL}ENSURE PACKAGE INTEGITY${DEF} ====      # ============================================"
+      "DNF -r                                   # rpmconf cleans .rpmnew, .rpmsave and .rpmorig files."
+      "REINSTALL_BASE_REPOs                     # Ensure the base repositories are are the latest version."
+      "remove-retired-packages                  #   Remove them (via query)."
+      "dnf5 repoquery --duplicates              # Find duplicate packages"
+      "dnf5 remove --duplicates                 #   Remove them."
+      "dnf5 list --obsoletes                    # List obsoleted packages."
+      "dnf5 list --extras ${Less}               # List packages installed but not from any repository."
+      "dnf5 remove \$(dnf5 repoquery --extras)   #   Remove them."
+      "dnf5 list --autoremove ${Less}           # List packages removed by the auroremove command."
+      "dnf5 autoremove                          #   Remove them."
+      "dnf5 distro-sync                         # Run this if there are depedency issues."
+      "dnf5 distro-sync --allowerasing          # Ditto with more force."
+      "dnf5 autoremove                          #   Again clean up leaf packages,"
+      "dnf5 distro-sync                         # Ensure all installed versions match."
+      "rpm --rebuilddb                          # Troubleshoot - Rebuild the rpm database"
+      ": ==== ${UL}PREPARE FOR THE WORST${DEF} ====        # ============================================"
+      "BACKUP --all                             # Either: Execute a full backup."
+      "BACKUP --all --exclude-large-files       #     Or: A full backup except for ISO, VDI... files."
+      ": ==== ${UL}DO THE UPGRADE${DEF} ====               # ============================================"
+      "dnf5 system-upgrade download -y --refresh --releasever=${NEW_RELEASE} ${NEW_RELEASE_OPTIONS}                                #\n                                                 # Download the new version."
+      "dnf5 system-upgrade download -y --allowerasing --refresh --releasever=${NEW_RELEASE} ${NEW_RELEASE_OPTIONS}                 #\n                                                 # Download with --allowerasing."
+      "eval less \"\${OUTPUT_FILE}\"               # View the log of \"system-upgrade download\"."
+      "dnf5 offline reboot                      # Reboot to install downloaded new version."
+      ": ==== ${UL}DOUBLE-CHECK and UTILITIES${DEF} ====   # ============================================"
+      "DNF -r                                   # Run rpmconf again for the new install."
+      "DD-COPY-ISO-TO-DEVICE                    # Create a bootable device from a Fedora image."
+  )
+  if [[ $1 == "display" ]] ; then
+    local I elements last
+    elements="${#MENU_ARRAY[*]}"
+    last="$(( elements - 1 ))"
+    echo -n "\n"
+    for ((I=0 ; I<elements ; I++)) ; do
+      (( I == last )) && echo -n "\t\t${MENU_ARRAY[${I}]}" \
+        ||  echo -n "\t\t${MENU_ARRAY[${I}]}\n"
+    done
+    return
+  fi
+}
+
+GET_ARGS \
+  --Header    "Helper to Manage dnf5 Options" \
+  --Args_Array a "@PATTERNS" \
+  --Copyright  a \
+  --Filter c  "Help on the repository cleanup options and on installing a new Fedora release." \
+  --Filter f  "Help on filter options available." \
+  --Filter i  "Help on query/information options." \
+  --Filter l  "Help on installation of packages or a new release." \
+  --Filter m  "Help on other options." \
+  --Filter u  "Help on upgrading package options." \
+  --Opt_D f   "a all" \
+                  --Des_D   "List all packages. All inclusions/exclusions are removed. See -x below." \
+  --Opt_D fl  "A available" \
+                  --Des_D   "The action is done on available packages only (default is both installed and available)." \
+  --Opt_D ail "aa:: assume-answer::@ANS" \
+                  --Des_D "Set the assumed answer to any display and installation ${GAoh}proceed... OK?${DEF} questions. ANS can be either \"y\" (answer yes), \"n\" (answer no) or any other value (or missing) to cause the prompt to display. The default for ANS is \"${ASSUMED_ANSWER_DEFAULT}\"." \
+  --Opt_D c   "c clean" \
+                  --Des_D   "Force the command ${GAoh}dnf5 clean all${DEF} to be executed either before the selected action or as a separate command." \
+  --Opt_D c   "C no-clean" \
+                  --Des_D   "Ensure the command ${GAoh}dnf5 clean all${DEF} is NOT executed before the selected action." \
+  --Act_D m   "create-alias-names" \
+                  --Des_D   "Create alias names for common dnf5 functions." \
+  --Act_D m   "d dnfdragora" \
+                  --Des_D   "Execute the command \"dnfdragora\" - a GUI interface for software management." \
+  --Act_D c   "D list-duplicate-packages" \
+                  --Des_D   "Execute the command ${GAoh}dnf5 repoquery --duplicated${DEF} to see duplicated packages (packages with multiple versions installed)." \
+  --Opt_D i   "co force-cacheonly" \
+                  --Des_D   "Force the use of --cacheonly even for root access." \
+  --Act_D a   "document-alias-names" \
+                  --Des_D "Document (display) the expansion of short names like ${GAoh}dnfu${DEF}, ${GAoh}dnfi${DEF} etc." \
+  --Hid_D a   "document-one-alias-name" \
+                  --Des_D "INTERNAL: Display the expansion of this command." \
+  --Act_D c   "e list-extras" \
+                  --Des_D   "Process the command ${GAoh}dnf5 list extras${DEF} to list extra/obsolete software packages." \
+  --Opt_D f   "f only-this-release" \
+                  --Des_D   "Append the current FEDORA_RELEASE_GLOB ${GAoh}${FEDORA_RELEASE_GLOB}${DEF} to all patterns." \
+  --Opt_D f   "F not-this-release" \
+                  --Des_D   "Opposite of -f. List/info for everything not belonging to the current FEDORA_RELEASE_GLOB ${GAoh}${FEDORA_RELEASE_GLOB}${DEF}." \
+  --Opt_D u   "force" \
+                  --Des_D   "On an upgrade, add the arguments ${GAoh}--best --allowerasing${DEF} to try and fix the message:\n\t\t\tError ... Skipping packages with broken dependencies:\n\t\tThis option may be used with --FORCE for a more full dependency resolution. For installing a new release (with -n or --new-release), --force adds${GAoh}--allowerasing${DEF} to the command\n\t\t\t${GAoh}dnf5 system-upgrade download...${DEF}" \
+  --Opt_D u   "FORCE" \
+                  --Des_D   "On an upgrade, add the argument ${GAoh}--enable-repo=updates-testing${DEF}. This attempts to do the upgrade with pre-release packages being tested. --FORCE can only used if an upgrade is requested. It may be used with --force for a more full dependency resolution." \
+  --Opt_D i   "g group" \
+                  --Des_D   "Adds ${GAoh}group${DEF} to the command line. I.E.  ${GAoh}dnfi -g ...${DEF} ==> ${GAoh}dnf5 group info ...${DEF}" \
+  --Act_D i   "hi:: history-info::@SPEC" \
+                  --Des_D   "Display details of dnf5 history transaction SPEC. SPEC is described below. If SPEC is not specified all transaction details are listed." \
+  --Act_D i   "hl:: history-list::@SPEC" \
+                  --Des_D   "Display the history of dnf5 transactions. SPEC is described below. If SPEC is not specified all transactions are listed." \
+  --Act_D i   "hs: history-search:@SEARCH" \
+                  --Des_D   "Display details of all dnf5 history transactions identified by the pattern SEARCH. SEARCH is a grep -E pattern that matches package name(s) installed, removed, updated etc." \
+  --Act_D uil "hu:: history-user::@HPATH" \
+                  --Des_D   "Create a file in HPATH listing all user-installed software. The default for HPATH is \"${DEFAULT_HISTORY_FILE}\". If HPATH=\"/dev/stdout\" the output will be displayed." \
+  --Act_D i   "i info" -O -A \
+                  --Des_D   "Display summary information on packages using ${GAoh}dnf5 info PATTERNS${DEF}." \
+  --Opt_D f   "I installed" \
+                  --Des_D   "The action is done on installed packages only (default is both installed and available)." \
+  --Act_D l   "ins install" -A \
+                  --Des_D   "Install the PATTERNS list using ${GAoh}dnf5 install ${ASSUMED_ANSWER_DEFAULT} PATTERNS${DEF}. Assumes -A." \
+  --Act_D i   "l list" -O -A \
+                  --Des_D   "List packages using ${GAoh}dnf5 list PATTERNS${DEF}. This is the default." \
+  --Act_D ci  "L list-package-files" -I "RPM_PACKAGES" \
+                  --Des_D   "Execute the command ${GAoh}rpm -ql PATTERNS${DEF} to list the files contained in an PATTERNS repository. The output is piped through ${GAoh}less${DEF}." \
+  --Opt_D i   "*vim" \
+                  --Des_D "Use the ${GAoh}vim${DEF} command to page the output. Specifically the output from the ${GAoh}dnfl${DEF} and ${GAoh}dnfi${DEF} commands does not pipe well into ${GAoh}less${DEF}. The default is to not page output except when options --hi, --hl, --hs, -L, -n and -R are used." \
+  --Act_D cl  "n new-release" \
+                  --Des_D   "Displays the following menu of steps to install and clean up the next Fedora release: fc${NEW_RELEASE}.\n$(INSTALL_NEW_RELEASE display)" \
+  --Opt_D mi  "N no-table" \
+                  --Des_D   "Do not reformat the dnf5 output into a compact tabular format. This is the default." \
+  --Opt_D f   "*o: include:@PATTERN" \
+                  --Des_D   "Only include packages identified by PATTERN. This option may be used more than once." \
+  --Opt_D f   "*O:: output::@OUTFILE" \
+                  --Des_D "Write the output to a specially formatted OUTFILE. Each line is formatted as:\n\t\t\tfc<version>    <package_name>\n\t\tThe <package_name> has the version and release infomation removed. The default OUTFILE name is created from the dnf5 command executed. For example \"DNF -glI -O\" would write the info to file:\n\t\t\t\"${FILE_OUT_DIR}${FILE_OUT_PREFIX}.group.list.installed.${FILE_OUT_SUFFIX}\"\n\t\tThis option can only be used with options -A, -I, -g or --hu." \
+  --Opt_D f   "output-dir:@OUTDIR" \
+                  --Des_D "Set the output directory for OUTFILE to OUTDIR. Use this option to write the output file to other than the current directory but still use the automatic naming of -O with the default OUTFILE. This option can only be used with option -O." \
+  --Opt_D f   "p only-this-platform" \
+                  --Des_D   "Append the current HPGLOB ${GAoh}${HARDWARE_PLATFORM_GLOB}${DEF} to all patterns." \
+  --Opt_D f   "P not-this-platform" \
+                  --Des_D   "Opposite of -p. List/info for everything but the current HPGLOB ${GAoh}${HARDWARE_PLATFORM_GLOB}${DEF}." \
+  --Act_D i   "provides:@COMMANDS" -I "COMMANDS" \
+                  --Des_D   "Execute the command ${GAoh}dnf5 provides COMMANDS${DEF}. Display which package contains a space-seperated list of COMMANDS." \
+  --Act_D cl  "r rpm-config-compare" \
+                  --Des_D   "Execute the command ${GAoh}rpmconf -a -f meld${DEF} to compare original configuration files with either *.rpmsave, *.rpmnew  or *.rpmorig files generated by an install." \
+  --Act_D ci  "R list-remote-package-files" -O -A \
+                  --Des_D   "Execute the command ${GAoh}DNF repoquery --list PATTERNS${DEF} to list the files contained in the packages. This is the same as -L but the information is extracted from the remote repository. The output is piped through ${GAoh}less${DEF}." \
+  --Act_D c   "rbd rebuild-rpm-db" \
+                  --Des_D   "Execute the command ${GAoh}rpm --rebuilddb${DEF} to rebuild the RPM database." \
+  --Act_D c   "s distro-sync" \
+                  --Des_D   "Execute the command ${GAoh}dnf5 distro-sync${DEF}. This tries to make your installed packages exactly the same version as in currently enabled repositories, even if it means downgrading some packages. This may help solve the problem:\n\t\t\t	Error: package XXXX requires YYYY, but none of the providers can be installed." \
+  --Act_D c   "S DISTRO-SYNC" \
+                  --Des_D   "Execute the command ${GAoh}dnf5 distro-sync --allowerasing${DEF}. A stronger variant of -s which also enables the removal of packages for which package dependencies can not be satisfied. Always carefully review which packages are going to be removed before confirming this." \
+  --Opt_D mi  "T table" \
+                  --Des_D   "Reformat the output (from any \"list\" action) into a compact tabular format." \
+  --Act_D u   "u upgrade" \
+                  --Des_D   "Upgrade the software using the command ${GAoh}dnf5 ${ASSUMED_ANSWER_DEFAULT} upgrade${DEF}." \
+  --Opt_D mi  "V verbose-no-less" \
+                  --Des_D   "Do not include a \"${LESS}\" after the command. Applies to the --hi, --hl, --hs, -L, -n and -R options. The default is to page the output from those commands" \
+  --Act_D cl  "w write-iso" \
+                  --Des_D   "Copy a Fedora (workstation...) ISO file to a device special file (USB, DVD...). You will be prompted for the pathname to the ISO file and to the device." \
+  --Opt_D f   "*x: exclude:@HPGLOB" \
+                  --Des_D   "Exclude all packages identified by HPGLOB. This option may be used more than once. Note: To make selection easier, the default exclude action is:\n\t\t\t${GAoh}--exclude=${OTHER_HARDWARE_PLATFORM_GLOB}${DEF}\n\t\tThe -a, -o and --include options reset this default." \
+  --Para  a A "One of the above ${GAoh}ACTION${DEF} options must be specified. The ${GAoh}ACTION${DEF} options are described in the OPTIONS section below." \
+  --Where a   "Any missing PATTERN defaults to ${GAoh}*${DEF}. The requested action is performed on PATTERNS. Patterns accepted by the ${GAoh}dnf${DEF} command can be used." \
+  --Where f   "FEDORA_RELEASE_GLOB is a string formatted as ${GAoh}fcNN${DEF}. It defaults to ${GAoh}${FEDORA_RELEASE_GLOB}${DEF}. The default is derived from the command ${GAoh}uname -r${DEF}." \
+  --Where f   "HPGLOB defaults to ${GAoh}${HARDWARE_PLATFORM_GLOB}${DEF} The default is derived from the command ${GAoh}uname -i${DEF}. It can be one of:\n\t\t3, 386, 6, 686, i, i386, i686    to select ${GAoh}i686${DEF}   packages\n\t\t        4,  64, x,  x86, x86_64  to select ${GAoh}x86_64${DEF} packages\n\t\t        n,  no, a, arch, noarch  to select ${GAoh}noarch${DEF} packages" \
+  --Where i   "SPEC can be either a <transaction-spec>, which specifies a transaction directly, or a range <transaction-spec>..<transaction-spec>, which specifies a range of transactions, or a <package-name-spec>, which  specifies  a transaction by a package which it manipulated." \
+   --Info i   "Only one action may be specified in the command line." \
+   --Info if  "The set of options: [-c|-C] [-f|-F] [-p|-P] [-a|[-o|--include]|[-x|--exclude]] are each mutually exclusive." \
+   --Info if  "The options -A -g and -I are mutually exclusive." \
+   --Info a   "Short names can be linked to the master script ${DNF} to easily implement actions. They are:\n${ALIAS_NAMES//@/\\t\\t}\n\tWhere:\t   dnfl ==> ${GAoh}${DNF} -l${DEF}   ${GAoh}dnfi${DEF} ==> ${GAoh}${DNF} -i${DEF}   ${GAoh}dnfua${DEF} ==> ${GAoh}${DNF} -u -a${DEF}   etc...\n\tTo see what each short name does, type the command \"${DNF} --document-alias-names\"." \
+   --         ${MODS} "$@"
+
+(( ${#Args[*]} > 0 )) && PATTERNS="${Args[*]@Q}"	# All remaining arguments are PATTERNS
+
+IS_EXCLUSIVE --Just_One create-alias-names
+IS_EXCLUSIVE --Just_One document-alias-names
+IS_EXCLUSIVE --Not_With vim hi hl hs L n R
+IS_EXCLUSIVE d D e hi hl hs hu i ins l L n provides r R s S u U w
+IS_EXCLUSIVE c C
+IS_EXCLUSIVE f F
+IS_EXCLUSIVE A I
+IS_EXCLUSIVE p P
+IS_EXCLUSIVE a o x
+IS_EXCLUSIVE --Only_With output-dir O
+IS_EXCLUSIVE --Only_With O A I l g hu
+IS_EXCLUSIVE --Defaulpt T				# Default is to not tabulate 'dnf5 list..'
+IS_EXCLUSIVE --Not_With T O
+if (( Opt_V )) ; then
+  IS_EXCLUSIVE --Only_With V hi hl hs L n R
+  LESS="       "
+fi
+
+echo -e "To see filtered help type:   ${CMD} -H"

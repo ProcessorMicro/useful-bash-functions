@@ -5,7 +5,7 @@
 #
 # PURPOSE = "These functions will scan the GET_ARGS_DIRECTIVES
 #            and create the necessaty environment for parsing parent script options."
-# VERSION = "14.01.11 - Oct 10, 2026"
+# VERSION = "14.02.01 - Oct 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -68,10 +68,11 @@ function scanAnalyzeGAOpts(	foundDes_D,foundOpt_D,gaMessage,plural1,plural2,plur
     mainMakeDebugComment( "" )
     mainMakeDebugComment( "======= Initialize Parent Script Variables =======" )
   }
-    mainMakeBashCommand( "unset " PSaltOptsArrayVar " " PSoptsAltArrayVar )
-    mainMakeBashCommand( "declare -gA " PSaltOptsArrayVar " " PSoptsAltArrayVar )
-    mainMakeBashCommand( "unset " PSoptsAllListVar " " PSargsArrayVar )
-    mainMakeBashCommand( "declare -ga " PSargsArrayVar )
+  mainMakeBashCommand( "unset " PSaltOptsArrayVar " " PSoptsAltArrayVar )
+  mainMakeBashCommand( "declare -gA " PSaltOptsArrayVar " " PSoptsAltArrayVar )
+  mainMakeBashCommand( "unset " PSoptsAllListVar " " PSargsArrayVar " " PSargsArrayVar PSsuffixPos)
+  mainMakeBashCommand( "declare -ga " PSargsArrayVar )
+  mainMakeBashCommand( "declare -ga " PSargsArrayVar PSsuffixPos )
   if ( GAisDebug ) {
     mainMakeDebugComment( "" )
     mainMakeDebugComment( "======= Alternate Spellings for Parent Script GET_ARGS_DIRECTIVES =======" )
@@ -558,6 +559,7 @@ function scanParseOPTi(		actOpen,actNext,actClose,bashAlt_Opts,count,gaOPTi,idxT
       BashUnsetVars = BashUnsetVars HELPnl " unset "
       BashUnsetVarsLen = BashUnsetVarsLen + BashUnsetVarsMax }
     BashUnsetVars = BashUnsetVars tokenVar " "	 	# Unset variable Opt_OPTi
+    BashUnsetVars = BashUnsetVars tokenVar PSsuffixPos " "	# Unset variable Opt_OPTi_Pos
     if ( optOptional ) BashUnsetVars = BashUnsetVars tokenVar PSoptSuffixVar " "	# Unset Opt_OPTi_Val if OPTi has a value
     GAsavedOPTLIST[tokenFirst] = GAsavedOPTLIST[tokenFirst] " " optDash token	# Remember the OPTLIST
     mainMakeBashArray(PSoptsAltArrayVar, optDash token, tokenAlt)

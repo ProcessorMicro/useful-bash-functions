@@ -34,6 +34,7 @@ GET_ARGS \
   --Opt_D "n: name:@NAME"	--Des_D "Change the name in the copyright notice to NAME. The default NAME is \"${DEFAULT_NAME}\"." \
   --Where "SCRIPTPATHNAME is the pathname of the script file to be created. It's mode is changed to be executable for everyone (\"ugo+x\"). If SCRIPTPATHNAME is missing the source code is written to sysout." \
   -- "$@"
+echo "${Args[1]}" ; exit
 
 if (( ${#Args[*]} )) ; then
   SCRIPT_PATH="$( realpath "${Args[1]}" )"

@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.4.ps_scan.gawk
 #
 # PURPOSE = "These functions analyze the parent script args when it is invoked."
-# VERSION = "14.01.11 - Oct 10, 2026"
+# VERSION = "14.02.01 - Oct 31, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -66,7 +66,7 @@ function psAnalyzeOptsAndArgs(	comment,getoptParsed) {
     mainMakeDebugComment( "======= Variables Created for the Parent Script =======" )
   }
   sub( /^,/, "", PSlongOptions )			# Remove leading comma from long options
-  psGetOptsAndArgs( PSshortOptions, PSlongOptions, PSintBO PSOptsAndArgs, getoptParsed )
+  psGetOptsAndArgs( "-" PSshortOptions, PSlongOptions, PSintBO PSOptsAndArgs, getoptParsed )
   PSparsedOptsAndArgs = getoptParsed[1]
   psParseOptsAndArgs()
   if ( BashOpts_All != " " ) {
@@ -76,6 +76,9 @@ function psAnalyzeOptsAndArgs(	comment,getoptParsed) {
     if ( PSintBO ) comment = " (with generated debug help)"
     mainMakeDebugComment( "======= Command Line" comment " =======" )
     mainMakeDebugComment( BashCmd " " gensub(/'/, "", "g", PSintBO PSOptsAndArgs) )
+    mainMakeDebugComment( "" )
+    mainMakeDebugComment( "======= Parsed Command Line =======" )
+    mainMakeDebugComment( BashCmd " " PSparsedOptsAndArgs )
     mainMakeDebugComment( "" )
     mainMakeDebugComment( "======= Additional Parent Script Commands =======" )
   }
@@ -193,7 +196,7 @@ function psMakeHelpSuggestion(	fc) {
   mainMakeBashVariable( "_HELP_SUGGESTION_", PShelpSuggestion )
 }
 
-function psNormalizeOptsAndArgs(	escapeDoubleQuotes) {
+function psNormalizeOptsAndArgs(escapeDoubleQuotes) {
   gsub( /^'*|'$/, "", PSOpt )				# Remove the surrounding single quotes (if any)
   if ( PSfoundQSQ ) {
     gsub( GAhideQSQ, "' '", PSOpt ) }			# Replace ' '
@@ -203,23 +206,24 @@ function psNormalizeOptsAndArgs(	escapeDoubleQuotes) {
   if ( escapeDoubleQuotes ) gsub( /"/, "\\\"", PSOpt )	# Escape double quotes
 }
 
-function psParseOptsAndArgs(	argsCount,idxA,idxP,isArgs,nextIsValue,optError,optFound,optsCount,psOptUsed,psVar) {
-  PSOptsAndArgsCount = split( PSparsedOptsAndArgs, PSOpts )	# Create an array
+function psOptsAndArgsCount() {
+#    mainMakeDebugComment( BashCmd " " gensub(/'/, "", "g", PSintBO PSOptsAndArgs) )
+      mainMakeBashArray( PSargsArrayVar PSsuffixPos, idxA++, ++PSargsNoptsPos )	# Add the position
+      mainMakeBashArray( psVar PSsuffixPos, 0, ++PSargsNoptsPos )	# Record the option position
+}
+
+function psParseOptsAndArgs(	argsCount,idxA,idxP,nextIsArg,nextIsValue,optError,optFound,optsCount,psOptUsed,psVar,restIsArgs) {
+  PSOptsAndArgsCount = split( "CMD " PSparsedOptsAndArgs, PSOpts )	# Add a dummy CMD and create an array
   idxA = 1						# The Args array is origin 1
   optsCount = 0						# Initialize the options counter
-  for ( idxP=1 ; idxP<=PSOptsAndArgsCount ; idxP++ ) {	# Look at each parent script option and arg
+  for ( idxP=2 ; idxP<=PSOptsAndArgsCount ; idxP++ ) {	# Look at each parent script option and arg
     PSOpt = gensub( /^'(.*)'$/, "\\1" ,1 ,PSOpts[idxP] )	# Remove surrounding "'"
-    if ( isArgs ) {					# Collect the Args into an array
-      psNormalizeOptsAndArgs()
-      mainMakeBashArray( PSargsArrayVar, idxA++, PSOpt )	# Add to the Args[X] array
-      argsCount++
-      continue }
     switch ( PSOpt ) {					# Look at each one
       case "--":					# This is a separator
-        isArgs = 1					# So the remainder are arguments
+        restIsArgs = 1					# So the remainder are arguments
         continue					# And no more "switch (..."
       case /^-/:					# It is an option
-        if ( ! nextIsValue ) {				# This one is an option
+        if ( ! nextIsValue && ! restIsArgs ) {		# This one is an option
           optsCount++					# Count the options
           sub( /^-{1,2}/, "", PSOpt )			# Strip the leading "-"
           PSOpt = GAdefinedOPTi[PSOpt]			# Convert to the first one defined
@@ -235,16 +239,24 @@ function psParseOptsAndArgs(	argsCount,idxA,idxP,isArgs,nextIsValue,optError,opt
               optFound[psVar] = optFound[psVar] " " PSOpts[idxP]	# Remember each time
               optError[psVar] = 1
             } else {					# The first time for tis Option
-              mainMakeBashVariable( psVar, 1 )	# Create the option variable
+              mainMakeBashVariable( psVar, 1 )		# Create the option variable
               optFound[psVar] = sprintf("Option %s can only be used once.\nNote: Options%s are synonyms.\nMultiple options detected are: %s", PSOpts[idxP], GAsavedOPTLIST[PSOpt], PSOpts[idxP] )
             }
           }
           BashOpts_All = BashOpts_All psOptUsed " "	# The parent script opts encountered (in order)
-          continue }
-      default:						# Must be an option value
+          mainMakeBashArray( psVar PSsuffixPos, 0, idxP )	# Add to the Opt_OPT1_Pos[X] array
+          continue
+        }
+      default:
         psNormalizeOptsAndArgs( 1 )			# Fix up and escape double quotes
-        mainMakeBashArray( psVar PSoptSuffixVar, 0, PSOpt )	# Augment xxx_Val array (index == 0)
-        nextIsValue = 0
+        if ( nextIsValue ) {
+          mainMakeBashArray( psVar PSoptSuffixVar, 0, PSOpt )	# Augment Opt_xxx_Val array (index == 0)
+          nextIsValue = 0
+        } else {					# Must be an argument
+          mainMakeBashArray( PSargsArrayVar, idxA, PSOpt 	)	# Add to the Args[X] array
+          mainMakeBashArray( PSargsArrayVar PSsuffixPos, idxA++, idxP )	# Add to the Args_Pos[X] array
+          argsCount++
+        }
         continue
     }							# END switch ( PSOpt )
   }							# END for ( idxP=1 ;...

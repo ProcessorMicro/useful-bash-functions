@@ -52,6 +52,7 @@ function Install() {
 
   VERIFY_REQUIREMENTS				# All the apps that are needed
 
+  # /etc/profile.d
   if [[ -f ${EtcDir}/${DefaultsFile} ]] ; then
     echo -e "\nThe GET_ARGS global defaults file \"${EtcDir}/${DefaultsFile}\" exists\n    so it was not overwritten.\nManually merge the install file with your existing one.\nThe install version is in \"${WhereAmI}/${DefaultsFile}\"."
   else
@@ -65,6 +66,7 @@ function Install() {
   (( $# )) && chown root:root ${EtcDir}/${ExtraFunctions} ${EtcDir}/${DefaultsFile}
   chmod 755 ${EtcDir}/${ExtraFunctions} ${EtcDir}/${DefaultsFile}
 
+  # /usr/local/bin
   while read -u 3 Script ; do
     if [[ ${Script} == MKSCRIPT && -f ${BinDir}/${Script} ]] ; then
       echo -e "\nThe script \"${BinDir}/${Script}\" exists\n    so it was not overwritten.\nManually merge the install file with your existing one.\nThe install version is in \"${WhereAmI}/${Script}\"."
@@ -73,7 +75,7 @@ function Install() {
     cp -f "${Script}" "${BinDir}" || ERROR "Copy of script \"${Script}\" failed."
     (( $# )) && chown root:root "${BinDir}/${Script}"
     chmod 755 "${BinDir}/${Script}"
-  done 3< <( ls ./{functions.sh,.f*awk,.f*.txt,MKSCRIPT,FIND-FUNCTIONS} )
+  done 3< <( ls ./{functions.sh,.f*awk,.f*.txt,MKSCRIPT,FIND-FUNCTIONS,FILTER_EXAMPLE} )
   if (( ! $# )) ; then
     if ! grep -q "^if .*_USER_functions_sh_loaded_" ~/.bashrc ; then
       sed --in-place ~/.bashrc -e '$a \
