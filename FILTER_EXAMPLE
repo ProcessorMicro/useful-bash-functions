@@ -99,6 +99,7 @@ function INSTALL_NEW_RELEASE() {
 }
 
 GET_ARGS \
+  --Debug \
   --Header    "Helper to Manage dnf5 Options" \
   --Args_Array a "@PATTERNS" \
   --Copyright  a \
@@ -229,4 +230,4 @@ if (( Opt_V )) ; then
   LESS="       "
 fi
 
-echo -e "To see filtered help type:   ${CMD} -H"
+(( $# )) || echo -e "To see filtered help type:   ${CMD} -H"

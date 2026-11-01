@@ -32,8 +32,6 @@ ASK can interact with the user with a text-based interface or a GUI dialog box i
 
 -----------------------------
 
-
-
 ## <a id="contents">Contents</a>
 
 &nbsp;&nbsp;&nbsp;&nbsp;[Purpose](#purpose)<br>
@@ -58,7 +56,7 @@ ASK can interact with the user with a text-based interface or a GUI dialog box i
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Examples of Help Implemented by GET_ARGS](#example-of-help)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[IS_EXCLUSIVE](#is-exclusive)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Example of GET_ARGS and IS_EXCLUSIVE working together](#example-of-get-args)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Example of the GET_ARGS --Filter Directiv](#filter-example)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Example of the GET_ARGS --Filter Directive](#filter-example)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ASK Functions](#ask-functions)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TMP_FILE_CREATE Functions](#tmp-file-create-functions)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[Examples of Functions](#examples-of-functions)<br>
@@ -685,10 +683,22 @@ FIND-FUNCTIONS -H
 
 The `GET_ARGS` --Filter directive is useful if a parent script has many options.
 Filtering is a mechanism that allows selected portions of the HELP to be displayed.
-To see how it works type:
+To see how it works type (on purpose it will display an error message):
 
 ```bash
 FILTER_EXAMPLE -H
+```
+
+To see the generated variable names and values, edit the script `FILTER_EXAMPLE` and add the following line after the line `GET_ARGS \` (line 101).
+
+```bash
+  --Debug \
+```
+
+Then execute the following to see the generated variables.
+
+```bash
+./FILTER_EXAMPLE -cg ls --list vim\* --installed -- thunderbird
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
