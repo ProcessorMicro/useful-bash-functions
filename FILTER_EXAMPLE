@@ -99,7 +99,6 @@ function INSTALL_NEW_RELEASE() {
 }
 
 GET_ARGS \
-  --Debug \
   --Header    "Helper to Manage dnf5 Options" \
   --Args_Array a "@PATTERNS" \
   --Copyright  a \
