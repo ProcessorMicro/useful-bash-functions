@@ -698,7 +698,7 @@ To see the generated variable names and values, edit the script `FILTER_EXAMPLE`
 Then execute the following to see the generated variables.
 
 ```bash
-./FILTER_EXAMPLE -cg ls --list vim\* --installed -- thunderbird
+FILTER_EXAMPLE -cg ls --list vim\* --installed -- thunderbird
 ```
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[top](#top)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[contents](#contents)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[bottom](#bottom)
