@@ -995,17 +995,17 @@ The functions related to colors are interesting. Try:
 
 ```bash
 # Display the function names containing "COLOR"
-FIND-FUNCTIONS -f '.*COLOR.*'
+FIND-FUNCTIONS -f 'COLOR.*'
 ```
 
 ```bash
 # Display the comments (help) for the COLOR functions
-FIND-FUNCTIONS -c -l ".*COLOR.*"
+FIND-FUNCTIONS -c -l "COLOR.*"
 ```
 
 ```bash
 # Now display the code
-FIND-FUNCTIONS -l ".*COLOR.*"
+FIND-FUNCTIONS -l "COLOR.*"
 ```
 
 ```bash
