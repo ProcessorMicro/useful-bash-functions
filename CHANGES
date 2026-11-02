@@ -1,3 +1,6 @@
+2026.11.02
+Removed "testing" line in MKSCRIPT.
+
 2026.11.01
 When a parent script is executed, GET_ARGS now saves the position of each
 option in the array Opt_OPT1_Pos[i] and each argument in the array
