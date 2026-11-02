@@ -1,4 +1,9 @@
 2026.11.02
+Changed the SCRIPT_PURPOSE and SCRIPT_VERSION variable names in:
+  FUNCTIONS-SH-EXTRA-FUNCTIONS.sh and FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
+to make them unique.
+
+2026.11.02
 Removed "testing" line in MKSCRIPT.
 
 2026.11.01

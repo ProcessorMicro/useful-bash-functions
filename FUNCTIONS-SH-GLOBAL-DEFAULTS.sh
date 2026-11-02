@@ -3,8 +3,8 @@
 #
 #	FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
 
-SCRIPT_PURPOSE="This script sets global defaults for the GET_ARGS and COLOR functions."
-SCRIPT_VERSION="12.04.02 - Sep 10, 2025"
+GLOBAL_SCRIPT_PURPOSE="This script sets global defaults for the GET_ARGS and COLOR functions."
+GLOBAL_SCRIPT_VERSION="12.04.05 - Nov 02, 2026"
 
 # Copyright (C) 2013-2025 by Mike Armstrong
 #
