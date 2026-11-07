@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.4.ps_scan.gawk
 #
 # PURPOSE = "These functions analyze the parent script args when it is invoked."
-# VERSION = "14.02.01 - Oct 31, 2026"
+# VERSION = "14.02.03 - Nov 07, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -165,9 +165,9 @@ function psIsPShelp(	allowed,helpOpt,helpMod) {
     HELPfilterCode = _a_ }
   if ( HELPmodifier && HELPmodifier !~ "[" _e_ _b_ _c_ "]" ) {	# No match
     if ( length(helpOpt) > 2 ) allowed = "=" allowed
-    psError( sprintf( "Invalid help modifier \"%s\".\nValid format is: %s%s. Valid <HM> codes are: $s, $s or$s",helpOpt,allowed,_e_,_b_,_c_ ) )
+    psError( sprintf( "Invalid help modifier \"%s\".\nValid format is: %s. Valid <HM> codes are: %s, %s or %s",helpMod,allowed,_e_,_b_,_c_ ) )
   }
-  restoreHelpDoIt()					# And display the help message
+  if ( ! PSerrorMessage ) restoreHelpDoIt()		# And display the help message
 }
 
 function psIsPStestOrVersion() {			# See if "test" or "version" is detected.

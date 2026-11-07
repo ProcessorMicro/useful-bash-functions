@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.6.save.gawk
 #
 # PURPOSE = "These functions save the variable values necessary to scan the parent script options."
-# VERSION = "14.02.01 - Oct 31, 2026"
+# VERSION = "14.02.03 - Nov 07, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -134,8 +134,10 @@ function saveVars() {
   saveVarDoIt( HELPcolumnSep, "HELPcolumnSep" )
   saveVarDoIt( HELPisCompact, "HELPisCompact" )
   saveVarDoIt( HELPisBrief, "HELPisBrief" )
-  saveVarDoIt( HELPheading, "HELPheading" )
-  saveVarDoIt( HELPheadingLen, "HELPheadingLen" )
+  saveVarDoIt( HELPheaderTitle, "HELPheaderTitle" )
+  saveVarDoIt( HELPheaderTitleLen, "HELPheaderTitleLen" )
+  saveVarDoIt( HELPfooterInfo, "HELPfooterInfo" )
+  saveVarDoIt( HELPfooterDate, "HELPfooterDate" )
   saveVarDoIt( SAVEhelpb, "SAVEhelpb" )
   saveVarDoIt( SAVEhelpe, "SAVEhelpe" )
   saveVarDoIt( SAVEhelpFI, "SAVEhelpFI" )

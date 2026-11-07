@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.5.help.gawk
 #
 # PURPOSE = "This script implements GET_ARGS help functionality."
-# VERSION = "14.02.01 - Oct 31, 2026"
+# VERSION = "14.02.03 - Nov 07, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -29,8 +29,9 @@ BEGIN {
   HELPcodesFCandHM = _a_ _b_ _c_ _e_
   # HELPbasicOptsFCsPos = 0				# Remembered position of --Bas_O -F ...
   # HELPbasicOptsFCgaOpt = X				# Remebersd spelling of --Bas...
-  HELPheading = "User Script"				# The default if GET_ARGS "--Heading" is not used
-  HELPheadingLen = length( HELPheading )		# The length of the heading text
+  HELPheaderTitle = "User Script"			# The default if GET_ARGS "--HeaderTitle" is not used
+  HELPheaderTitleLen = length( HELPheaderTitle )	# The length of the heading text
+  HELPfooterInfo = "User Script"			# The default if GET_ARGS "--FooterInfo" is not used
 
   # Help Management
   # HELPsection["H","b"] = X				# An array (indexed by section ID) containing the help information
@@ -65,6 +66,7 @@ BEGIN {
   HELPdefaultCopyright = "Copyright © 2021 Free Software Foundation, Inc. License GPLv3+: GNU GPL version 3 or later. See: <https://gnu.org/licenses/gpl.html>. This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law."
   # HELPisBrief = 0					# True if brief help is requested
   # HELPisCompact = 0					# True if compact help is requested
+  # HELPisExpanded = 0					# True if expanded help is requested
   # HELPtext = X					# Used by HELP to create the display
   HELPsynopsis = BashCmd				# The beginning synopsis line in the SYNOPSIS section
   # HELPsynopsisAction = X				# ACTION keyword in the SYNOPSIS section
@@ -128,7 +130,7 @@ function helpSectionInsertDoIt(helpType,briefHelp,	filterPfx,headerFilterPfx,hel
       helpNL = HELPnl					# Set the <NL> to use if not --Opt_D ...
     } else if ( GAinst[Grp] == GAisTitlePara ) {
       helpNL = HELPnl					# Set the <NL> to use for --Title and --Para
-      if ( GAinst[Typ] == GAisTitle ) {			# --Para
+      if ( GAinst[Typ] == GAisPara ) {			# --Para
         HELPsectionText = HELPcolumnSep HELPsectionText }	# So move the para text to column 2
     }
     leadingNL = "" }					# No leading <NL>

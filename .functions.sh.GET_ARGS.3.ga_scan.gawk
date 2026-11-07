@@ -5,7 +5,7 @@
 #
 # PURPOSE = "These functions will scan the GET_ARGS_DIRECTIVES
 #            and create the necessaty environment for parsing parent script options."
-# VERSION = "14.02.01 - Oct 31, 2026"
+# VERSION = "14.02.03 - Nov 07, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -281,8 +281,8 @@ function scanAnalyzeGAOpts(	foundDes_D,foundOpt_D,gaMessage,plural1,plural2,plur
           switch ( GAinst[Typ] ) {
             case /[05]/:
               continue					# Ignore: --Bas_O, --Filter, --Section, --nocolor
-            case 1:					# --Heading
-              scanIsDuplicate( GAtestHeading, GAOpt )
+            case 1:					# --HeaderTitle
+              scanIsDuplicate( GAtestHeaderTitle, GAOpt )
               continue
             case 2:					# --Action [FCLIST] ACTION
               scanIsDuplicate( GAtestAction, GAOpt )	# Only check for duplicates - processed by pre-scan
@@ -292,6 +292,10 @@ function scanAnalyzeGAOpts(	foundDes_D,foundOpt_D,gaMessage,plural1,plural2,plur
               continue
             case 4:					# --Debug
               scanIsDuplicate( GAtestDebug, GAOpt )
+              continue
+            case 6:					# --FooterInfo
+              scanIsDuplicate( GAtestFooterInfo, GAOpt )
+              HELPfooterInfo = GAOptArg
               continue
           }						# End of "switch ( GAinst[Typ] )"
       }							# END of "switch ( GAinst[Grp] )"

@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.0.globals.gawk
 #
 # PURPOSE = "This gawk script identifies/defines some of the global variables."
-# VERSION = "14.02.01 - Oct 31, 2026"
+# VERSION = "14.02.03 - Nov 07, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -159,11 +159,12 @@ BEGIN {
   GAOptInst["--Bas"] = "9011011x01b"			# --Basic_Option arguments
   GAOptInst["--Fil"] = "9010100x01"			# --Filter - <FC> and 1 extra argument required
   GAOptInst["--Sec"] = "9020000x00"			# --Section_Header - 2 required arguments
-  GAOptInst["--Hea"] = "9110000H11"			# --Heading
+  GAOptInst["--Hea"] = "9110000H11"			# --HeaderTitle
   GAOptInst["--Atn"] = "9210010S11"			# --Action
   GAOptInst["--Var"] = "9310000x00x"			# --Variable
   GAOptInst["--Deb"] = "9401000x00"			# --Debug - one optional argument
   GAOptInst["--Noc"] = "9500000x00"			# --Nocolor
+  GAOptInst["--Foo"] = "9610000x00"			# --FooterInfo
   # The following are used for generation of a section text
   GAOptInst["--Tra"] = "9410010T11"			# Internal - --Trailer
   GAOptInst["--Pur"] = "9800011P01p"			# Automatic PURPOSE section
@@ -182,6 +183,7 @@ BEGIN {
   GAisList = 7						# For Grp 2: --Args_List
   GAisTitlePara = 5					# For Grp 5: --Title and --Para
   GAisTitle = 0						# For Grp 5 Typ 0: --Title
+  GAisPara = 1						# For Grp 5 Typ 1: --Para
   GAisPreScan = 9					# For GRP 9
   GAbigNum = 1024^4					# Hopefully more than the number or arguments ever encounteres
 
@@ -207,7 +209,8 @@ BEGIN {
   # GAtestTabstop[Cat] = 0				#   Ditto --Tabs
   # GAtestCopyright[Cat] = 0				#   Ditto --Copyright
   # GAtestCmd[Cat] = 0					#   Ditto --Cmd
-  # GAtestHeading[Cat] = 0				#   Ditto --Heading
+  # GAtestHeaderTitle[Cat] = 0				#   Ditto --HeaderTitle
+  # GAtestFooterInfo[Cat] = 0				#   Ditto --FooterInfo
   # GAtestPager[Cat] = 0				#   Ditto --Pager
   # GAtestDebug[Cat] = 0				#   Ditto --Debug
   # GAtestVariable[Cat] = 0				#   Ditto --Variable

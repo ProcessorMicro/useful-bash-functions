@@ -2,7 +2,7 @@
 # vim: set nomodified number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
 SCRIPT_PURPOSE_COMMON_FUNCTIONS_SH="This script contains a set of common bash functions for use in other bash scripts."
-SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.02.01 - Oct 31, 2026"
+SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.02.03 - Nov 07, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -51,6 +51,15 @@ SCRIPT_VERSION_COMMON_FUNCTIONS_SH="14.02.01 - Oct 31, 2026"
 ##        SCRIPT_PURPOSE   and   SCRIPT_VERSION
 ##     They should be defined BEFORE the GET_ARGS function is called as their
 ##     values are included in the generated HELP.
+##
+## SCRIPT_PURPOSE - VARIABLE FORMAT
+##   A text string containing any characters. Special characters must be escaped.
+##
+## SCRIPT_VERSION - VARIABLE FORMAT
+##   A text srring containing a VERSION and a VERSIONDATE
+##     VERSION must be a series of digits separated by dots ("."). It must contain
+##       at least one dot and must start and end with  a digit. E.G. 11.3.4
+##       VERSION
 ##
 ##   Also, each parent script must either initialize functions.sh or source it.
 ##
@@ -2526,7 +2535,7 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##   SUMMARY OF GET_ARGS_DIRECTIVES THAT AUGMENT THE HELP DISPLAY
 ##     These GET_ARGS_DIRECTIVES are parsed on a pre-scan.
 ##       --Filter FC FILTERDESCRIPTION  | --Act[ion] ACTION
-##       --Bas[ic]_O[ption] MODINFO     | --Hea[ding] [N@]HEADING
+##       --Bas[ic]_O[ption] MODINFO     | --Hea[derTitle] HEADERTITLE
 ##       --Deb[ug] [SIMULATEHELP]       | --Var[iables] VARLIST
 ##       --Sec[tionTitle] SECTION "NEWTITLE"
 ##       --Noc[olors]
@@ -2542,6 +2551,7 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##       --Exp[andTabstops] [-L] ETAB      | --Bri[efTabstops] [-L] BTAB
 ##       --Com[pactTabstops] [-L] CTAB     | --Tab[stops] [-L] TTAB
 ##       --Pag[er] PAGER                   | --Def[ault] EBC [[-L] DTAB]
+##       --Foo[terInfo] FOOTERINFO
 ##
 ##     All GET_ARGS_DIRECTIVES can be abbreviated to "--" followed by three
 ##       characters except:
@@ -3116,16 +3126,23 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##         section with a paragraph CMD_DESCRIPTION. Use --Cmd_D to create a
 ##         detailed description of the purpose of the parent script.
 ##       Additional paragraphs can be added with the --Para GET_ARGS_DIRECTIVE.
-##     --Hea[ding] [N@]HEADING
-##       Use HEADING within the first line of the HELP display. The default
-##       value for HEADING is "User Script". The syntax of the first line is
+##     --Hea[derTitle] HEADERTITLE
+##       Modify HEADERTITLE within the first line of the HELP display. The
+##       default value for HEADERTITLE is "User Script". The syntax of the first
+##       line is three fields:
+##             ${CMD}(1)    HEADERTITLE    ${CMD}(1)
+##       The HEADERTITLE is centered and ${CMD}(1} is left and right justified.
+##       If the length of the three fields is greater than ${COLUMNS}, then only
+##       HEADERTITLE (centered on the line) is used.
+##     --Foo[terInfo] FOOTERINFO
+##       Modify FOOTERINFO within the last line of the HELP display. The default
+##       value for FOOTERINFO is "User Script". The syntax of the lsst line is
 ##       three fields:
-##             ${CMD}(1)    ${HEADING}    ${CMD}(1)
-##       spread evenly to fill the first line. If the length of the three fields
-##       is greater than ${COLUMNS}, then only HEADING by itself is used.
-##       If <ESC> sequences are used in HEADING, folding of the first may occur.
-##       If so, add "N@" where N is number that overrides the calculated length
-##       of HEADING.
+##             FOOTERINFO    FOOTERDATE    ${CMD}(1)
+##       FOOTERINFO is left justified, FOOTERDATE is centered, and ${CMD}(1)
+##       is right justified. FOOTERDATE is parsed from ${SCRIPT_VERSION}.
+##       If parsing fails, the default FOOTERDATE is the modification date
+##       of the parent script.
 ##     --Whe[re] [FCLIST] WHERE
 ##       Inserts SYNTAX into the WHERE section (following BASIC OPTIONS).
 ##         Multiple --Where GET_ARGS_DIRECTIVES can be defined.
@@ -3238,10 +3255,11 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##     The order of any GET_ARGS_DIRECTIVES is as follows:
 ##       1) For readability, the following GET_ARGS_DIRECTIVES should (but need
 ##          not) be the  beginning arguments to GET_ARGS.
-##             --Filter    --Header     --Section  --Action
-##             --Bas_O     --Variables  --Nocolor  --Debug
-##             --Args_...  --Opts_...   --Expand   --Brief
-##             --Compact   --Default    --Tabstops --Pager
+##             --Filter   --HeaderTitle   --FooterInfo   --Section
+##             --Action   --Bas_O         --Variables    --Nocolor
+##             --Debug    --Args_...      --Opts_...     --Expand
+##             --Brief    --Compact       --Default      --Tabstops
+##             --Pager
 ##          The first 8 of these are pre-scanned before the full scan is done.
 ##       2) Any GET_ARGS_DIRECTIVE information for a section occurs in the order
 ##          the GET_ARGS_DIRECTIVE for that section is encountered.
@@ -3256,9 +3274,10 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##       5) If any conflicting GET_ARGS_DIRECTIVES are used, the last one is the
 ##          one that takes effect.
 ##       6) The following GET_ARGS_DIRECTIVES can only be specified once:
-##            --Args_...  --Opts_...  --Heading   --Expand  --Brief
-##            --Compact   --Default   --Tabs      --Action  --Copyright
-##            --Cmd       --Var       --Pager     --Debug
+##            --Args_...   --Opts_...    --HeaderTitle   --FooterInfo
+##            --Expand     --Brief       --Compact       --Default
+##            --Tabs       --Action      --Copyright     --Cmd
+##            --Var        --Pager       --Debug
 ##
 ##   HIGHLIGHTING
 ##     Select parts of the help display are (can be) highlighted. Several bash
@@ -3336,8 +3355,8 @@ function _FIND_NFS_PATH_FROM_FSTAB_ () {
 ##
 ##   IMPLEMENTATION
 ##     GET_ARGS executes the following process steps:
-##       (1) A prescan that processes --Bas_O, --filter, --Header, --Action,
-##           --Debug --Variables and --SectionHeader.
+##       (1) A prescan that processes --Bas_O, --filter, --HeaderTitle,
+##           --Action, --Debug --Variables and --SectionHeader.
 ##       (2) A scan of the GET_ARGS_DIRECTIVES to establish allowed/expected
 ##           parent script options and arguments. The results are saved in
 ##           the files "script.gawk" and "script1.sh".
@@ -3482,7 +3501,7 @@ function GET_ARGS_DEFAULT() {
   _SAVE_VARIABLES_+=" -v SAVEdir=${_SAVE_DIR_} "
   _SAVE_VARIABLES_+=" -v SAVEgawkScript=${_SAVED_GAWK_} -v SAVEbashScript1=${_SAVED_BASH1_} -v SAVEbashScript2=${_SAVED_BASH2_} "
 
-  _GAWK_VARIABLES_="  -v BashCmd=${CMD} -v BashTabStop=${_TAB_STOPS_} -v BashColumns=${COLUMNS} -v BashIsUsageExit=${_IS_USAGE_EXIT_} "
+  _GAWK_VARIABLES_="  -v BashCmd=${CMD} -v BashCmdPath=${CMD_PATH} -v BashTabStop=${_TAB_STOPS_} -v BashColumns=${COLUMNS} -v BashIsUsageExit=${_IS_USAGE_EXIT_} "
   _GAWK_VARIABLES_+=" -v BashPager=${FUNCTIONS_SH_PAGER} -v GAah=${GAah} -v GArs=${DEF} -v GAoh=${GAoh} -v GAsh=${GAsh} -v GAth=${GAth} "
 
   # The output of the gawk script (${_SAVED_GAWK_=}) is sourced to set the parsed, parent script option/arguments variables.

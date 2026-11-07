@@ -4,7 +4,7 @@
 #	.functions.sh.GET_ARGS.1.main.gawk
 #
 # PURPOSE = "This is the main gawk script called by GET_ARGS."
-# VERSION = "14.02.01 - Oct 31, 2026"
+# VERSION = "14.02.03 - Nov 07, 2026"
 #
 # This gawk script is executed by the GET_ARGS function in /usr/local/bin/functions.sh
 # It provides a pre-scan of the GET_ARGS_DIRECTIVES, followed by a full scan. And a scan
@@ -31,9 +31,8 @@
 @include  ".functions.sh.GET_ARGS.4.ps_scan.gawk"
 @include  ".functions.sh.GET_ARGS.7.restore.gawk"
 #
-# The following is for debugging a major change. To implement, "commant"
+# The following is for debugging a major change. To implement, "comment"
 # the above two "@include" and remove the comment from the two below.
-# #ME ==>  ".functions.sh.GET_ARGS.1.main.gawk.NEW"
 # @include ".functions.sh.GET_ARGS.4.ps_scan.gawk.NEW"
 # @include ".functions.sh.GET_ARGS.7.restore.gawk.NEW"
 
@@ -82,6 +81,11 @@ BEGIN {							# Set up to do two passes on the input files
   HELPnoTabNL = "[" HELPtab HELPnl "]+"			# For brief help - remove <TAB> & <NL> sequences
   HELPesc = "\033"					# An escape character
   HELPglobalDefault[Cat] = ""				# Initialize it
+  # HELPheader = X					# The created header
+  # HELPheaderTitle = X					# The middle part of the header
+  # HELPheaderTitleLen = X				# The length minus and ANSI ESC sequences
+  # HELPfooter = X					# The created footer
+  # HELPfooterDate = X					# The middle part of the footer
 
   FileCount = ARGC - 1					# Remember how many files
   for ( idx=1 ; idx<=FileCount ; idx++ ) {		# Then add all the names onto the arguments array
@@ -101,10 +105,10 @@ END {							# Return the result
   }
   mainMakeBashCommand( MainWhatToDoAtEnd MainErrorCode )	# Put the command into the script file
   if ( GAisDebug ) {						# Debug mode requested
-    close ( SAVEbashScript1 )
-    close ( SAVEbashScript2 )
+    close( SAVEbashScript1 )
+    close( SAVEbashScript2 )
     MAINcmd = "touch " SAVEbashScript2 " ; cat " SAVEbashScript1 " " SAVEbashScript2 HELPless	# So show the contents of the script file
-    system (MAINcmd)
+    system(MAINcmd)
   }
   exit MainErrorCode
 }
@@ -117,6 +121,7 @@ END {							# Return the result
     printf( "" ) > SAVEbashScript1			# Ensure the GET_ARGS_DIRECTIVES script file is empty
     preScanGAOpts()					# Pre-scan for --Var --Bas_O --Filter --Action --Compress --Tab --Debug
     scanAnalyzeGAOpts()					# Analyze the GET_ARGS_DIRECTIVES
+    mainMakeFooterDate()				# Extracts the date from ${SCRIPT_VERSION}
     saveEverything()					# Save the parsed GET_ARGS_DIRECTIVES
     psAnalyzeOptsAndArgs()				# Analyze the parent script options and arguments
   } else {
@@ -126,6 +131,18 @@ END {							# Return the result
   exit							# Process only one line
 }
 # =================^ Main Process ^==================== #
+
+function mainMakeFooterDate(	cmd,result,spaces) {
+  cmd = "python <<<\"from dateutil.parser import parse ; text = \\\"" gensub(/[0-9]+(\.[0-9]+)+(.*)/,"\\2",1,BashScriptVersion)
+  cmd = cmd "\\\" ; date_obj, tokens = parse(text, fuzzy_with_tokens=True) ; print(date_obj.date())\" 2>/dev/null"
+  cmd | getline HELPfooterDate
+  close( cmd)
+  if ( ! HELPfooterDate ) {				# Cannot parse date from ${SCRIOPT_VERSION}
+    cmd = "date '+%Y-%m-%d' -r " BashCmdPath		# So get the parent script modification date
+    cmd | getline HELPfooterDate
+    close( cmd)
+  }
+}
 
 function mainError(message,errorCode) {			# Display the error message and exit
   message = gensub( "([^\001])\\n", "\\1\n" GAerrorPrefix, "G", message )	# Indent any additional (un-marked) line feeds

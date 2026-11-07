@@ -53,8 +53,7 @@ GET_ARGS --Args_Array @FUNCTIONPATTERN \
                                    --Des_D "COMMENTPATTERNSUFFIX is used to help define the first line of a function comment. The default COMMENTPATTERNSUFFIX is \"${CommentPatternSuffix}\"." \
   --Opt_D "D display"		   --Des_D "Display the matching functions on SYSOUT. This is the default." \
   --Opt_D "E: editor:@EDITORandOPTIONS[=GUI]" \
-                                   --Des_D "Use EDITOR as the editor. The string EDITORandOPTIONS must include the command and the necessary options to read a file." \
-  --Para O "\tIf EDITOR is GUI-based, EDITORandOPTIONS must be terminated with the string \"=GUI\". This will ensure the contents of the temporary file used is not deleted by the cleanup script until EDITOR terminates." \
+                                   --Des_D "Use EDITOR as the editor. The string EDITORandOPTIONS must include the command and the necessary options to read a file. If EDITOR is GUI-based, EDITORandOPTIONS must be terminated with the string \"=GUI\". This will ensure the contents of the temporary file used is not deleted by the cleanup script until EDITOR terminates." \
   --Opt_D "f function-names-only"  --Des_D "Only display matching function names (no function contents)." \
   --Opt_D "G gvim"		   --Des_D "Use gvim as the editor." \
   --Hid_D "highlight::@LIGHT"	   --Des_D "Highlight salient GET_ARGS and IS_EXCLUSIVE definitions in ${CMD} and exit. Use optional argument LIGHT (any characers) if the terminal background is light." \

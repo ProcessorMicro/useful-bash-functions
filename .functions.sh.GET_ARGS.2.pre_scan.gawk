@@ -5,7 +5,7 @@
 #
 # PURPOSE = "These functions do a pre-scan of the GET_ARGS_OPTS to locate GAOpts that will influence
 #            the information collected during the GAOpts "full" scan and the parent script options scan."
-# VERSION = "14.02.01 - Oct 31, 2026"
+# VERSION = "14.02.03 - Nov 07, 2026"
 #
 # Copyright (C) 2013-2026 by Mike Armstrong
 #
@@ -35,7 +35,7 @@ BEGIN {
   PREtmpMessage = ""					# Ditto
 }
 
-# Do a pre-scan to process GET_ARGS_DIRECTIVES: --Bas_O, --Filter, --Heading, --Compact and --Tab
+# Do a pre-scan to process GET_ARGS_DIRECTIVES: --Bas_O, --Filter, --HeaderTitle, --Compact and --Tab
 function preScanGAOpts(		basicOptionError) {
   preGAOptSearch( "--Deb" )				# Search for a --Debug statement
   GAtestDebug[Cat] = 0					# Reset as is tested again in ga_scan
@@ -74,8 +74,8 @@ function preScanGAOpts(		basicOptionError) {
   }
   preInitializeBasicOpti()				# Define the basic options help text
 
-  preGAOptSearch( "--Hea" )				# The heading is set at help initialization
-  GAtestHeading[Cat] = 0				# Reset as is tested again in ga_scan
+  preGAOptSearch( "--Hea" )				# The headerTitle is set at help initialization
+  GAtestHeaderTitle[Cat] = 0				# Reset as is tested again in ga_scan
 
   preGAOptSearch( "--Noc" )				# --Nocolors
 
@@ -105,7 +105,7 @@ function preGAOptSearch(gaOptPart) {
         preParseFilters()
         continue
       case "--Hea":
-        scanIsDuplicate( GAtestHeading, GAOpt, GAtypeIsText )
+        scanIsDuplicate( GAtestHeaderTitle, GAOpt, GAtypeIsText )
         preParseHeading()				# Analyze the heading
         continue
       case "--Sec":					# Section header changes
@@ -258,23 +258,13 @@ function preParseFilters(	filterCode,filterError,filterMsg) {
 
 function preParseHeading(	cmd,head,lenFixed,result,seps) {
   preGetNextArg()
-  split( GAOptArg, head, "@", seps )			# Separate it
-  if ( seps[1] == "@" ) {				# --Heading [N@]HEADING
-    if ( ! mainIsNumeric(head[1]) ) {
-      preError( sprintf("Heading length \"%s\" is not numeric.",head[1]) ) }
-    HELPheading = head[2]				# Change the default
-    HELPheadingLen = head[1]				# And set the length
-    lenFixed = 1 }					# The length is specified
-  else {
-    HELPheading = head[1]				# Change the default
-    HELPheadingLen = length( head[1] )			# And set the length
-  }
-  if ( HELPheading ~ GAansiESC && ! lenFixed ) {	# Have to adjust the length
-    cmd = "ansifilter <<<'" HELPheading "'"		# Remove the <ESC> sequences
+  HELPheaderTitle = gensub( "\\\\+E", HELPesc, "G", GAOptArg )
+  if ( HELPheaderTitle ~ HELPesc ) {			# Have to adjust the length
+    cmd = "ansifilter --text <<<'" HELPheaderTitle "'"		# Remove the <ESC> sequences
     cmd | getline result				# Get the pure text line
     close( cmd )
-    HELPheadingLen = length( result )			# Set the new length without <ESC> sequences
-    }
+    HELPheaderTitleLen = length( result )		# Set the new length without <ESC> sequences
+  } else HELPheaderTitleLen = length( HELPheaderTitle )
 }
 
 # Change any basic option <OLDCODE> to <NEWCODE>

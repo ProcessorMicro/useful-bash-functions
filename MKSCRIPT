@@ -2,7 +2,7 @@
 # vim:set number nowrap foldmethod=indent foldnestmax=2 nofoldenable:
 
 SCRIPT_PURPOSE="This script will create a new bash script using a basic template."
-SCRIPT_VERSION="01.03.08 - May 26, 2026"
+SCRIPT_VERSION="01.03.09 - Nov 02, 2026"
 
 # Copyright (C) 2013-2026 by Mike Armstrong
 #

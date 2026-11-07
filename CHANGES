@@ -1,3 +1,7 @@
+2026.11.07
+Added a --FooterInfo directive to GET_ARGS.
+Fixed several GET_ARGS help display issues.
+
 2026.11.02
 Changed the SCRIPT_PURPOSE and SCRIPT_VERSION variable names in:
   FUNCTIONS-SH-EXTRA-FUNCTIONS.sh and FUNCTIONS-SH-GLOBAL-DEFAULTS.sh
